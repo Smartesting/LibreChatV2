@@ -742,3 +742,18 @@ export type TUpdateSkillNodeRequest = {
   parentId?: string | null;
   order?: number;
 };
+
+/*
+  Smartesting custom types
+ */
+
+export type TTraineeUser = {
+  email: string;
+  password: string;
+  id: string;
+};
+
+export type TGenerateTraineesResponse = {
+  message: string;
+  users: TTraineeUser[];
+};

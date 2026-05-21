@@ -1,67 +1,70 @@
 import { createSessionMethods, DEFAULT_REFRESH_TOKEN_EXPIRY, type SessionMethods } from './session';
 import { createTokenMethods, type TokenMethods } from './token';
+import type { RoleDeps, RoleMethods } from './role';
 import { createRoleMethods, RoleConflictError } from './role';
-import type { RoleMethods, RoleDeps } from './role';
 import { createUserMethods, DEFAULT_SESSION_EXPIRY, type UserMethods } from './user';
 import { createKeyMethods, type KeyMethods } from './key';
 import { createFileMethods, type FileMethods } from './file';
 /* Memories */
 import { createMemoryMethods, type MemoryMethods } from './memory';
 /* Agent Categories */
-import { createAgentCategoryMethods, type AgentCategoryMethods } from './agentCategory';
+import { type AgentCategoryMethods, createAgentCategoryMethods } from './agentCategory';
 /* Agent API Keys */
-import { createAgentApiKeyMethods, type AgentApiKeyMethods } from './agentApiKey';
+import { type AgentApiKeyMethods, createAgentApiKeyMethods } from './agentApiKey';
 /* MCP Servers */
 import { createMCPServerMethods, type MCPServerMethods } from './mcpServer';
 /* Plugin Auth */
 import { createPluginAuthMethods, type PluginAuthMethods } from './pluginAuth';
 /* Permissions */
-import { createAccessRoleMethods, type AccessRoleMethods } from './accessRole';
+import { type AccessRoleMethods, createAccessRoleMethods } from './accessRole';
 import { createUserGroupMethods, type UserGroupMethods } from './userGroup';
-import { createAclEntryMethods, permissionBitSupersets, type AclEntryMethods } from './aclEntry';
+import { type AclEntryMethods, createAclEntryMethods, permissionBitSupersets } from './aclEntry';
 import { createSystemGrantMethods, type SystemGrantMethods } from './systemGrant';
 import { createShareMethods, type ShareMethods } from './share';
 /* Tier 1 — Simple CRUD */
-import { createActionMethods, type ActionMethods } from './action';
-import { createAssistantMethods, type AssistantMethods } from './assistant';
-import { createBannerMethods, type BannerMethods } from './banner';
+import { type ActionMethods, createActionMethods } from './action';
+import { type AssistantMethods, createAssistantMethods } from './assistant';
+import { type BannerMethods, createBannerMethods } from './banner';
 import { createToolCallMethods, type ToolCallMethods } from './toolCall';
-import { createCategoriesMethods, type CategoriesMethods } from './categories';
+import { type CategoriesMethods, createCategoriesMethods } from './categories';
 import { createPresetMethods, type PresetMethods } from './preset';
 /* Tier 2 — Moderate (service deps injected) */
-import { createConversationTagMethods, type ConversationTagMethods } from './conversationTag';
+import { type ConversationTagMethods, createConversationTagMethods } from './conversationTag';
 import { createMessageMethods, type MessageMethods } from './message';
-import { createConversationMethods, type ConversationMethods } from './conversation';
+import { type ConversationMethods, createConversationMethods } from './conversation';
 /* Tier 3 — Complex (heavier injection) */
 import {
-  createTxMethods,
-  type TxMethods,
-  type TxDeps,
-  tokenValues,
   cacheTokenValues,
-  premiumTokenValues,
+  createTxMethods,
   defaultRate,
+  premiumTokenValues,
+  tokenValues,
+  type TxDeps,
+  type TxMethods,
 } from './tx';
 import { createTransactionMethods, type TransactionMethods } from './transaction';
 import { createSpendTokensMethods, type SpendTokensMethods } from './spendTokens';
-import { createPromptMethods, type PromptMethods, type PromptDeps } from './prompt';
+import { createPromptMethods, type PromptDeps, type PromptMethods } from './prompt';
 import {
-  createSkillMethods,
-  type SkillMethods,
-  type SkillDeps,
   type CreateSkillInput,
+  createSkillMethods,
   type CreateSkillResult,
-  type UpdateSkillInput,
-  type UpsertSkillFileInput,
   type ListSkillsByAccessParams,
   type ListSkillsByAccessResult,
+  type SkillDeps,
+  type SkillMethods,
+  type UpdateSkillInput,
   type UpdateSkillResult,
+  type UpsertSkillFileInput,
   type ValidationIssue,
 } from './skill';
 /* Tier 5 — Agent */
-import { createAgentMethods, type AgentMethods, type AgentDeps } from './agent';
+import { type AgentDeps, type AgentMethods, createAgentMethods } from './agent';
 /* Config */
-import { createConfigMethods, type ConfigMethods } from './config';
+import { type ConfigMethods, createConfigMethods } from './config';
+import { createTrainingMethods, TrainingMethods } from '~/methods/training';
+import { createTrainingOrganizationMethods, TrainingOrganizationMethods } from '~/methods/trainingOrganization';
+import { createInvitationMethods, InvitationMethods } from '~/methods/invitation';
 
 export { RoleConflictError, DEFAULT_REFRESH_TOKEN_EXPIRY, DEFAULT_SESSION_EXPIRY };
 export { tokenValues, cacheTokenValues, premiumTokenValues, defaultRate };
@@ -98,7 +101,10 @@ export type AllMethods = UserMethods &
   PromptMethods &
   SkillMethods &
   AgentMethods &
-  ConfigMethods;
+  ConfigMethods &
+  TrainingMethods &
+  TrainingOrganizationMethods &
+  InvitationMethods;
 
 /** Dependencies injected from the api layer into createMethods */
 export interface CreateMethodsDeps {
@@ -228,6 +234,10 @@ export function createMethods(
     ...agentMethods,
     /* Config */
     ...createConfigMethods(mongoose),
+    /* Smartesting */
+    ...createTrainingMethods(mongoose),
+    ...createTrainingOrganizationMethods(mongoose),
+    ...createInvitationMethods(mongoose),
   };
 }
 
@@ -273,4 +283,7 @@ export type {
   ValidationIssue,
   AgentMethods,
   ConfigMethods,
+  TrainingMethods,
+  TrainingOrganizationMethods,
+  InvitationMethods,
 };

@@ -1,12 +1,12 @@
-import { logger, tenantStorage, SYSTEM_TENANT_ID } from '@librechat/data-schemas';
+import type { AppConfig, IRole } from '@librechat/data-schemas';
+import { logger, SYSTEM_TENANT_ID, tenantStorage } from '@librechat/data-schemas';
 import {
-  SystemRoles,
-  Permissions,
-  roleDefaults,
-  PermissionTypes,
   getConfigDefaults,
+  Permissions,
+  PermissionTypes,
+  roleDefaults,
+  SystemRoles,
 } from 'librechat-data-provider';
-import type { IRole, AppConfig } from '@librechat/data-schemas';
 import { isMemoryEnabled } from '~/memory/config';
 
 /**
@@ -114,7 +114,12 @@ export async function updateInterfacePermissions({
   // 1. Explicit user configuration (from librechat.yaml)
   // 2. Role-specific defaults (from roleDefaults)
   // 3. Interface schema defaults (from interfaceSchema.default())
-  for (const roleName of [SystemRoles.USER, SystemRoles.ADMIN]) {
+  for (const roleName of [
+    SystemRoles.ADMIN,
+    SystemRoles.ORGADMIN,
+    SystemRoles.TRAINER,
+    SystemRoles.TRAINEE,
+  ]) {
     const defaultPerms = roleDefaults[roleName]?.permissions;
 
     const existingRole = await getRoleByName(roleName);
@@ -151,9 +156,7 @@ export async function updateInterfacePermissions({
         } else if (isMemoryDisabled) {
           logger.debug(`Role '${roleName}': Disabling memories as memory.disabled is true`);
         } else if (isMemoryReenabling) {
-          logger.debug(
-            `Role '${roleName}': Re-enabling memories due to memory configuration`,
-          );
+          logger.debug(`Role '${roleName}': Re-enabling memories due to memory configuration`);
         }
       } else {
         logger.debug(`Role '${roleName}': Preserving existing permissions for '${permType}'`);

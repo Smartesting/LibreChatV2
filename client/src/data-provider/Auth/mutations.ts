@@ -180,3 +180,17 @@ export const useVerifyTwoFactorTempMutation = (
     },
   );
 };
+
+export const useDeleteUserByIdMutation = (
+  options?: t.MutationOptions<unknown, string>,
+): UseMutationResult<unknown, unknown, string, unknown> => {
+  const queryClient = useQueryClient();
+  return useMutation([MutationKeys.deleteUserById], {
+    mutationFn: (userId) => dataService.deleteUserById(userId),
+    ...(options || {}),
+    onSuccess: (...args) => {
+      queryClient.removeQueries();
+      options?.onSuccess?.(...args);
+    },
+  });
+};

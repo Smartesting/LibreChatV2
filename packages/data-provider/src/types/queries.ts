@@ -227,3 +227,59 @@ export type GraphTokenResponse = {
   expires_in: number;
   scope: string;
 };
+
+export type User = {
+  userId?: string;
+  email: string;
+  invitationToken?: string;
+  invitationExpires?: Date;
+  invitedAt?: Date;
+  activatedAt?: Date;
+};
+
+export type TrainingOrganization = {
+  _id: string;
+  name: string;
+  administrators: User[];
+  trainers: User[];
+};
+
+export type Training = {
+  _id: string;
+  name: string;
+  description?: string;
+  timezone: string;
+  startDateTime: Date;
+  endDateTime: Date;
+  participantCount: number;
+  location: string;
+  trainers: string[];
+  trainees: Array<{
+    username: string;
+    password: string;
+    hasLoggedIn: boolean;
+  }>;
+  trainingOrganizationId: string;
+};
+
+export type TrainingWithStatus = Training & { status: TrainingStatus };
+
+export enum TrainingStatus {
+  PAST = 'past',
+  IN_PROGRESS = 'in_progress',
+  UPCOMING = 'upcoming',
+}
+
+export type TrainingOrganizationCreateParams = TrainingOrganization;
+
+export type TrainingCreateParams = Omit<Training, '_id'>;
+
+export type Invitation = {
+  email: string;
+  invitationTokens: string[];
+  roles: {
+    superAdmin: boolean;
+    orgAdmin: string[];
+    orgTrainer: string[];
+  };
+};

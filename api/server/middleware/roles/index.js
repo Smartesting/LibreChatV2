@@ -11,7 +11,9 @@
  *   require('~/server/middleware/roles/capabilities')
  */
 const checkAdmin = require('./admin');
+const checkOrgAccess = require('./checkOrgAccess');
 
 module.exports = {
   checkAdmin,
+  checkOrgAccess,
 };

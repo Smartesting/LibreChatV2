@@ -1281,3 +1281,136 @@ export interface ActiveJobsResponse {
 export const getActiveJobs = (): Promise<ActiveJobsResponse> => {
   return request.get(endpoints.activeJobs());
 };
+
+/* Training organizations */
+export const createTrainingOrganization = ({
+  ...data
+}: q.TrainingOrganizationCreateParams): Promise<q.TrainingOrganization> => {
+  return request.post(endpoints.trainingOrganizations(), data);
+};
+
+export const listTrainingOrganizations = (): Promise<q.TrainingOrganization[]> => {
+  return request.get(endpoints.trainingOrganizations());
+};
+
+export const deleteTrainingOrganization = (id: q.TrainingOrganization['_id']): Promise<void> => {
+  return request.delete(endpoints.trainingOrganizations(id));
+};
+
+export const getTrainingOrganizationById = (
+  id: q.TrainingOrganization['_id'],
+): Promise<q.TrainingOrganization> => {
+  return request.get(endpoints.trainingOrganizations(id));
+};
+
+export const addAdministratorToOrganization = (
+  id: q.TrainingOrganization['_id'],
+  email: string,
+): Promise<q.TrainingOrganization> => {
+  return request.post(endpoints.trainingOrganizations(id, 'administrators'), { email });
+};
+
+export const removeAdministratorFromOrganization = (
+  id: q.TrainingOrganization['_id'],
+  email: string,
+): Promise<q.TrainingOrganization> => {
+  return request.delete(endpoints.trainingOrganizations(id, 'administrators', email));
+};
+
+export const addTrainerToOrganization = (
+  id: q.TrainingOrganization['_id'],
+  email: string,
+): Promise<q.TrainingOrganization> => {
+  return request.post(endpoints.trainingOrganizations(id, 'trainers'), { email });
+};
+
+export const removeTrainerFromOrganization = (
+  id: q.TrainingOrganization['_id'],
+  email: string,
+): Promise<q.TrainingOrganization> => {
+  return request.delete(endpoints.trainingOrganizations(id, 'trainers', email));
+};
+
+export const getTrainingsByOrganization = (
+  organizationId: string,
+): Promise<q.TrainingWithStatus[]> => {
+  return request.get(endpoints.trainings(organizationId, 'getByOrg'));
+};
+
+export const createTraining = (
+  organizationId: string,
+  data: q.TrainingCreateParams,
+): Promise<q.Training> => {
+  return request.post(endpoints.trainings(organizationId, 'create'), data);
+};
+
+export const deleteTraining = (organizationId: string, trainingId: string): Promise<void> => {
+  return request.delete(endpoints.trainings(organizationId, 'delete', trainingId));
+};
+
+export const updateTraining = (
+  organizationId: string,
+  id: string,
+  data: Partial<q.Training>,
+): Promise<q.Training> => {
+  return request.put(endpoints.trainings(organizationId, 'update', id), data);
+};
+
+export function getUserSession(): Promise<never> {
+  return request.get(endpoints.session());
+}
+
+export function getAdminInvitations(): Promise<q.Invitation[]> {
+  return request.get(endpoints.adminInvitations());
+}
+
+export function getOrgAdminInvitations(orgId: string): Promise<q.Invitation[]> {
+  return request.get(endpoints.orgAdminInvitations(orgId));
+}
+
+export function getOrgTrainerInvitations(orgId: string): Promise<q.Invitation[]> {
+  return request.get(endpoints.orgTrainerInvitations(orgId));
+}
+
+export function grantAdminAccess(data: { email: string }): Promise<{ message: string }> {
+  return request.post(endpoints.grantAdminAccess(), data);
+}
+
+export function revokeAdminAccess(data: { email: string }): Promise<{ message: string }> {
+  return request.post(endpoints.revokeAdminAccess(), data);
+}
+
+export function getAdminUsers(): Promise<t.TUser[]> {
+  return request.get(endpoints.admins());
+}
+
+export function getAllUsers(): Promise<t.TUser[]> {
+  return request.get(endpoints.allUsers());
+}
+
+export const getActiveOrganizationMembers = (
+  id: q.TrainingOrganization['_id'],
+): Promise<{ activeAdministrators: t.TUser[]; activeTrainers: t.TUser[] }> => {
+  return request.get(endpoints.trainingOrganizations(id, 'active-members'));
+};
+
+/**
+ * Check if the current user is an active trainer in any ongoing training
+ * @returns Promise with isActiveTrainer boolean
+ */
+export function isActiveTrainer(): Promise<{ isActiveTrainer: boolean }> {
+  return request.get(endpoints.isActiveTrainer());
+}
+
+/**
+ * Generate multiple trainee users with random credentials
+ * @param count - The number of trainee users to create
+ * @returns Promise with the created users and their credentials
+ */
+export const generateTrainees = (count: number): Promise<t.TGenerateTraineesResponse> => {
+  return request.post(endpoints.generateTrainees(), { count });
+};
+
+export function deleteUserById(userId: string): Promise<s.TPreset> {
+  return request.delete(endpoints.deleteUserById(userId));
+}

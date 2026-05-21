@@ -648,6 +648,11 @@ export type TVectorStore = {
 
 export type TThread = { id: string; createdAt: string };
 
+export type OrgForm = {
+  name: string;
+  administrators: string[];
+};
+
 declare global {
   interface Window {
     google_tag_manager?: unknown;

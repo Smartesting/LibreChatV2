@@ -1,22 +1,22 @@
 import { z } from 'zod';
 import {
-  Permissions,
-  PermissionTypes,
-  permissionsSchema,
   agentPermissionsSchema,
-  promptPermissionsSchema,
-  skillPermissionsSchema,
-  memoryPermissionsSchema,
-  runCodePermissionsSchema,
   bookmarkPermissionsSchema,
-  webSearchPermissionsSchema,
-  fileSearchPermissionsSchema,
-  multiConvoPermissionsSchema,
-  mcpServersPermissionsSchema,
-  peoplePickerPermissionsSchema,
-  remoteAgentsPermissionsSchema,
-  temporaryChatPermissionsSchema,
   fileCitationsPermissionsSchema,
+  fileSearchPermissionsSchema,
+  mcpServersPermissionsSchema,
+  memoryPermissionsSchema,
+  multiConvoPermissionsSchema,
+  peoplePickerPermissionsSchema,
+  Permissions,
+  permissionsSchema,
+  PermissionTypes,
+  promptPermissionsSchema,
+  remoteAgentsPermissionsSchema,
+  runCodePermissionsSchema,
+  skillPermissionsSchema,
+  temporaryChatPermissionsSchema,
+  webSearchPermissionsSchema,
 } from './permissions';
 
 /**
@@ -31,6 +31,18 @@ export enum SystemRoles {
    * The default user role
    */
   USER = 'USER',
+  /**
+   * The organization admin role
+   */
+  ORGADMIN = 'ORGADMIN',
+  /**
+   * The trainer role
+   */
+  TRAINER = 'TRAINER',
+  /**
+   * The trainee role
+   */
+  TRAINEE = 'TRAINEE',
 }
 
 export const roleSchema = z.object({
@@ -111,6 +123,18 @@ const defaultRolesSchema = z.object({
         [Permissions.SHARE_PUBLIC]: z.boolean().default(true),
       }),
     }),
+  }),
+  [SystemRoles.ORGADMIN]: roleSchema.extend({
+    name: z.literal(SystemRoles.ORGADMIN),
+    permissions: permissionsSchema,
+  }),
+  [SystemRoles.TRAINER]: roleSchema.extend({
+    name: z.literal(SystemRoles.TRAINER),
+    permissions: permissionsSchema,
+  }),
+  [SystemRoles.TRAINEE]: roleSchema.extend({
+    name: z.literal(SystemRoles.TRAINEE),
+    permissions: permissionsSchema,
   }),
   [SystemRoles.USER]: roleSchema.extend({
     name: z.literal(SystemRoles.USER),
@@ -200,55 +224,103 @@ export const roleDefaults = defaultRolesSchema.parse({
       },
     },
   },
-  [SystemRoles.USER]: {
-    name: SystemRoles.USER,
+  [SystemRoles.ORGADMIN]: {
+    name: SystemRoles.ORGADMIN,
     permissions: {
       [PermissionTypes.PROMPTS]: {
-        [Permissions.USE]: true,
-        [Permissions.CREATE]: true,
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
+        [Permissions.USE]: false,
+        [Permissions.CREATE]: false,
       },
-      [PermissionTypes.BOOKMARKS]: {},
-      [PermissionTypes.MEMORIES]: {},
+      [PermissionTypes.BOOKMARKS]: {
+        [Permissions.USE]: false,
+      },
       [PermissionTypes.AGENTS]: {
-        [Permissions.USE]: true,
-        [Permissions.CREATE]: true,
         [Permissions.SHARE]: false,
         [Permissions.SHARE_PUBLIC]: false,
+        [Permissions.USE]: false,
+        [Permissions.CREATE]: false,
       },
+      [PermissionTypes.MULTI_CONVO]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.TEMPORARY_CHAT]: {
+        [Permissions.USE]: false,
+      },
+      [PermissionTypes.RUN_CODE]: {
+        [Permissions.USE]: false,
+      },
+      //TODO ARC: Update this
+      [PermissionTypes.MEMORIES]: {},
+      [PermissionTypes.WEB_SEARCH]: {},
+      [PermissionTypes.PEOPLE_PICKER]: {},
+      [PermissionTypes.MARKETPLACE]: {},
+      [PermissionTypes.FILE_SEARCH]: {},
+      [PermissionTypes.FILE_CITATIONS]: {},
+      [PermissionTypes.MCP_SERVERS]: {},
+      [PermissionTypes.REMOTE_AGENTS]: {},
+      [PermissionTypes.SKILLS]: {},
+    },
+  },
+  [SystemRoles.TRAINER]: {
+    name: SystemRoles.TRAINER,
+    permissions: {
+      [PermissionTypes.PROMPTS]: {},
+      [PermissionTypes.BOOKMARKS]: {},
+      [PermissionTypes.AGENTS]: {},
       [PermissionTypes.MULTI_CONVO]: {},
       [PermissionTypes.TEMPORARY_CHAT]: {},
       [PermissionTypes.RUN_CODE]: {},
+      [PermissionTypes.MEMORIES]: {},
       [PermissionTypes.WEB_SEARCH]: {},
-      [PermissionTypes.PEOPLE_PICKER]: {
-        [Permissions.VIEW_USERS]: false,
-        [Permissions.VIEW_GROUPS]: false,
-        [Permissions.VIEW_ROLES]: false,
-      },
-      [PermissionTypes.MARKETPLACE]: {
-        [Permissions.USE]: false,
-      },
+      [PermissionTypes.PEOPLE_PICKER]: {},
+      [PermissionTypes.MARKETPLACE]: {},
       [PermissionTypes.FILE_SEARCH]: {},
       [PermissionTypes.FILE_CITATIONS]: {},
-      [PermissionTypes.MCP_SERVERS]: {
-        [Permissions.USE]: true,
-        [Permissions.CREATE]: false,
-        [Permissions.SHARE]: false,
-        [Permissions.SHARE_PUBLIC]: false,
-      },
-      [PermissionTypes.REMOTE_AGENTS]: {
-        [Permissions.USE]: false,
-        [Permissions.CREATE]: false,
-        [Permissions.SHARE]: false,
-        [Permissions.SHARE_PUBLIC]: false,
-      },
-      [PermissionTypes.SKILLS]: {
-        [Permissions.USE]: true,
-        [Permissions.CREATE]: true,
-        [Permissions.SHARE]: false,
-        [Permissions.SHARE_PUBLIC]: false,
-      },
+      [PermissionTypes.MCP_SERVERS]: {},
+      [PermissionTypes.REMOTE_AGENTS]: {},
+      [PermissionTypes.SKILLS]: {},
+    },
+  },
+  [SystemRoles.TRAINEE]: {
+    name: SystemRoles.TRAINEE,
+    permissions: {
+      [PermissionTypes.PROMPTS]: {},
+      [PermissionTypes.BOOKMARKS]: {},
+      [PermissionTypes.AGENTS]: {},
+      [PermissionTypes.MULTI_CONVO]: {},
+      [PermissionTypes.TEMPORARY_CHAT]: {},
+      [PermissionTypes.RUN_CODE]: {},
+      [PermissionTypes.MEMORIES]: {},
+      [PermissionTypes.WEB_SEARCH]: {},
+      [PermissionTypes.PEOPLE_PICKER]: {},
+      [PermissionTypes.MARKETPLACE]: {},
+      [PermissionTypes.FILE_SEARCH]: {},
+      [PermissionTypes.FILE_CITATIONS]: {},
+      [PermissionTypes.MCP_SERVERS]: {},
+      [PermissionTypes.REMOTE_AGENTS]: {},
+      [PermissionTypes.SKILLS]: {},
+    },
+  },
+  [SystemRoles.USER]: {
+    name: SystemRoles.USER,
+    permissions: {
+      [PermissionTypes.PROMPTS]: {},
+      [PermissionTypes.BOOKMARKS]: {},
+      [PermissionTypes.AGENTS]: {},
+      [PermissionTypes.MULTI_CONVO]: {},
+      [PermissionTypes.TEMPORARY_CHAT]: {},
+      [PermissionTypes.RUN_CODE]: {},
+      [PermissionTypes.MEMORIES]: {},
+      [PermissionTypes.WEB_SEARCH]: {},
+      [PermissionTypes.PEOPLE_PICKER]: {},
+      [PermissionTypes.MARKETPLACE]: {},
+      [PermissionTypes.FILE_SEARCH]: {},
+      [PermissionTypes.FILE_CITATIONS]: {},
+      [PermissionTypes.MCP_SERVERS]: {},
+      [PermissionTypes.REMOTE_AGENTS]: {},
+      [PermissionTypes.SKILLS]: {},
     },
   },
 });

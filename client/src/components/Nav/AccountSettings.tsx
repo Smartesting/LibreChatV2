@@ -1,15 +1,16 @@
-import { useState, memo, useRef } from 'react';
+import { memo, useRef, useState } from 'react';
 import * as Menu from '@ariakit/react/menu';
 import { FileText, LogOut } from 'lucide-react';
-import { LinkIcon, GearIcon, DropdownMenuSeparator, Avatar } from '@librechat/client';
+import { Avatar, DropdownMenuSeparator, GearIcon, LinkIcon } from '@librechat/client';
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
-import { useLocalize } from '~/hooks';
+import { useLocalize, useSmaLocalize } from '~/hooks';
 import Settings from './Settings';
 
 function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const localize = useLocalize();
+  const smaLocalize = useSmaLocalize();
   const { user, isAuthenticated, logout } = useAuthContext();
   const { data: startupConfig } = useGetStartupConfig();
   const balanceQuery = useGetUserBalance({
@@ -69,6 +70,13 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             <DropdownMenuSeparator />
           </>
         )}
+        <Menu.MenuItem
+          onClick={() => (window.location.href = '/admin')}
+          className="select-item text-sm"
+        >
+          <FileText className="icon-md" aria-hidden="true" />
+          {smaLocalize('com_nav_admin')}
+        </Menu.MenuItem>
         <Menu.MenuItem onClick={() => setShowFiles(true)} className="select-item text-sm">
           <FileText className="icon-md" aria-hidden="true" />
           {localize('com_nav_my_files')}

@@ -44,11 +44,13 @@ import translationUk from './uk/translation.json';
 import translationBs from './bs/translation.json';
 import translationNb from './nb/translation.json';
 import translationSl from './sl/translation.json';
+import smaTranslationEn from './en/smaTranslation.json';
+import smaTranslationFr from './fr/smaTranslation.json';
 
 export const defaultNS = 'translation';
 
 export const resources = {
-  en: { translation: translationEn },
+  en: { translation: translationEn, sma: smaTranslationEn },
   ar: { translation: translationAr },
   bs: { translation: translationBs },
   ca: { translation: translationCa },
@@ -60,7 +62,7 @@ export const resources = {
   es: { translation: translationEs },
   et: { translation: translationEt },
   fa: { translation: translationFa },
-  fr: { translation: translationFr },
+  fr: { translation: translationFr, sma: smaTranslationFr },
   it: { translation: translationIt },
   nb: { translation: translationNb },
   pl: { translation: translationPl },
@@ -102,7 +104,7 @@ i18n
       default: ['en'],
     },
     fallbackNS: 'translation',
-    ns: ['translation'],
+    ns: ['translation', 'sma'],
     debug: false,
     defaultNS,
     resources,

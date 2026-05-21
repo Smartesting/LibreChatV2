@@ -26,6 +26,12 @@ import type {
   TDeleteSkillFileResponse,
   TSkillListResponse,
 } from './skills';
+import {
+  Training,
+  TrainingCreateParams,
+  TrainingOrganization,
+  TrainingOrganizationCreateParams,
+} from './queries';
 
 export type MutationOptions<
   Response,
@@ -506,3 +512,25 @@ export interface CancelMCPOAuthResponse {
   success: boolean;
   message: string;
 }
+
+export type CreateTrainingOrganizationMutationOptions = MutationOptions<
+  TrainingOrganization,
+  TrainingOrganizationCreateParams
+>;
+
+export type CreateTrainingMutationOptions = MutationOptions<Training, TrainingCreateParams>;
+
+export type DeleteTrainingMutationOptions = MutationOptions<
+  void,
+  { organizationId: string; trainingId: string }
+>;
+
+export type UpdateTrainingMutationOptions = MutationOptions<
+  Training,
+  { id: string; data: Partial<Training> }
+>;
+
+export type DeleteTrainingOrganizationMutationOptions = MutationOptions<
+  void,
+  TrainingOrganization['_id']
+>;

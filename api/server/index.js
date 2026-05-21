@@ -223,6 +223,16 @@ const startServer = async () => {
 
   app.use('/metrics', metricsRouter);
 
+  /*
+    Smartesting endpoints
+   */
+  app.use('/api/session', routes.session);
+  app.use('/api/training-organizations', routes.trainingOrganizations);
+  app.use('/api/organization', routes.trainings);
+  app.use('/api/admins', routes.admins);
+  app.use('/api/invitations', routes.invitations);
+
+
   /** 404 for unmatched API routes */
   app.use('/api', apiNotFound);
 

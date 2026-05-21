@@ -1,9 +1,9 @@
 import {
   CacheKeys,
-  SystemRoles,
-  roleDefaults,
   permissionsSchema,
   removeNullishValues,
+  roleDefaults,
+  SystemRoles,
 } from 'librechat-data-provider';
 import type { Model } from 'mongoose';
 import type { IRole, IUser } from '~/types';
@@ -40,7 +40,12 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
   async function initializeRoles() {
     const Role = mongoose.models.Role;
 
-    for (const roleName of [SystemRoles.ADMIN, SystemRoles.USER]) {
+    for (const roleName of [
+      SystemRoles.ADMIN,
+      SystemRoles.ORGADMIN,
+      SystemRoles.TRAINER,
+      SystemRoles.TRAINEE,
+    ]) {
       let role = await Role.findOne({ name: roleName });
       const defaultPerms = roleDefaults[roleName].permissions;
 

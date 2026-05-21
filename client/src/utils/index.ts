@@ -41,6 +41,7 @@ export { default as cleanupPreset } from './cleanupPreset';
 export { default as buildDefaultConvo } from './buildDefaultConvo';
 export { default as getDefaultEndpoint } from './getDefaultEndpoint';
 export { default as createChatSearchParams, processValidSettings } from './createChatSearchParams';
+export { default as isValidEmail } from './isValidEmail';
 export { getThemeFromEnv } from './getThemeFromEnv';
 
 export const languages = [

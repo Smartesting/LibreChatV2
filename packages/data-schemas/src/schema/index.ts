@@ -26,3 +26,6 @@ export { default as memorySchema } from './memory';
 export { default as groupSchema } from './group';
 export { default as systemGrantSchema } from './systemGrant';
 export { default as configSchema } from './config';
+export { default as trainingOrganizationSchema } from './trainingOrganization';
+export { default as trainingSchema } from './training';
+export { default as invitationSchema } from './invitation';

@@ -32,6 +32,11 @@ const auth = require('./auth');
 const keys = require('./keys');
 const user = require('./user');
 const mcp = require('./mcp');
+const session = require('./session');
+const trainingOrganizations = require('./trainingOrganizations');
+const trainings = require('./trainings');
+const admins = require('./admins');
+const invitations = require('./invitations');
 
 module.exports = {
   mcp,
@@ -68,4 +73,9 @@ module.exports = {
   categories,
   staticRoute,
   accessPermissions,
+  session,
+  trainingOrganizations,
+  trainings,
+  admins,
+  invitations,
 };

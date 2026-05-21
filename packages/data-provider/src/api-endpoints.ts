@@ -491,3 +491,54 @@ export const getAllEffectivePermissions = (resourceType: ResourceType) =>
 // SharePoint Graph API Token
 export const graphToken = (scopes: string) =>
   `${BASE_URL}/api/auth/graph-token?scopes=${encodeURIComponent(scopes)}`;
+
+/*
+  Smartesting custom endpoints
+ */
+export const session = () => '/api/session';
+export const adminUsers = () => '/api/user/admins';
+export const allUsers = () => '/api/user/all';
+export const deleteUserById = (userId: string) => `/api/user/${userId}/delete`;
+export const generateTrainees = () => '/api/user/generate-trainees';
+export const removeExpiredTrainees = () => '/api/user/remove-expired-trainees';
+export const isActiveTrainer = () => '/api/organization/is-active-trainer';
+/* Admin Invitations */
+export const adminInvitations = () => '/api/invitations/admins';
+export const orgAdminInvitations = (orgId: string) =>
+  `/api/invitations/organizations/${orgId}/admins`;
+export const orgTrainerInvitations = (orgId: string) =>
+  `/api/invitations/organizations/${orgId}/trainers`;
+/* Admins */
+export const admins = () => '/api/admins';
+export const grantAdminAccess = () => '/api/admins/grant-access';
+export const revokeAdminAccess = () => '/api/admins/revoke-access';
+
+export const trainingOrganizations = (id?: string, path?: string, email?: string) => {
+  let url = '/api/training-organizations';
+
+  if (id) {
+    url += `/${id}`;
+
+    if (path) {
+      url += `/${path}`;
+
+      if (email && (path === 'administrators' || path === 'trainers')) {
+        url += `/${email}`;
+      }
+    }
+  }
+
+  return url;
+};
+
+export const trainings = (
+  organizationId: string,
+  action: 'create' | 'update' | 'delete' | 'getByOrg' | 'get',
+  trainingId?: string,
+) => {
+  let endpoint = `/api/organization/${organizationId}/trainings/${action}`;
+  if (trainingId) {
+    endpoint += `/${trainingId}`;
+  }
+  return endpoint;
+};

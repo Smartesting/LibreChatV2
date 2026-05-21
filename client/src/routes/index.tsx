@@ -1,16 +1,16 @@
 import { createBrowserRouter, Navigate, Outlet } from 'react-router-dom';
 import {
-  Login,
-  VerifyEmail,
-  Registration,
-  ResetPassword,
   ApiErrorWatcher,
-  TwoFactorScreen,
+  Login,
+  Registration,
   RequestPasswordReset,
+  ResetPassword,
+  TwoFactorScreen,
+  VerifyEmail,
 } from '~/components/Auth';
 import { MarketplaceProvider } from '~/components/Agents/MarketplaceContext';
 import AgentMarketplace from '~/components/Agents/Marketplace';
-import { OAuthSuccess, OAuthError } from '~/components/OAuth';
+import { OAuthError, OAuthSuccess } from '~/components/OAuth';
 import { AuthContextProvider } from '~/hooks/AuthContext';
 import RouteErrorBoundary from './RouteErrorBoundary';
 import StartupLayout from './Layouts/Startup';
@@ -20,6 +20,13 @@ import ShareRoute from './ShareRoute';
 import ChatRoute from './ChatRoute';
 import Search from './Search';
 import Root from './Root';
+import TrainingOrganizationsRoute from '~/routes/TrainingOrganizationsRoute';
+import TrainingOrganizationRoute from '~/routes/TrainingOrganizationRoute';
+import OrgAdminProtectedRoute from '~/routes/OrgAdminProtectedRoute';
+import SuperAdminRoute from '~/routes/SuperAdminRoute';
+import OrgAdminInvite from '~/components/Auth/OrgAdminInvite';
+import AdminInvite from '~/components/Auth/AdminInvite';
+import TrainerInvite from '~/components/Auth/TrainerInvite';
 
 const AuthLayout = () => (
   <AuthContextProvider>
@@ -79,6 +86,18 @@ export const router = createBrowserRouter(
           path: 'reset-password',
           element: <ResetPassword />,
         },
+        {
+          path: 'org-admin-invite',
+          element: <OrgAdminInvite />,
+        },
+        {
+          path: 'admin-invite',
+          element: <AdminInvite />,
+        },
+        {
+          path: 'trainer-invite',
+          element: <TrainerInvite />,
+        },
       ],
     },
     {
@@ -90,6 +109,16 @@ export const router = createBrowserRouter(
       element: <AuthLayout />,
       errorElement: <RouteErrorBoundary />,
       children: [
+        {
+          path: 'training-organizations',
+          element: <TrainingOrganizationsRoute />,
+          errorElement: <RouteErrorBoundary />,
+        },
+        {
+          path: 'training-organizations/:orgId',
+          element: <TrainingOrganizationRoute />,
+          errorElement: <RouteErrorBoundary />,
+        },
         {
           path: '/',
           element: <LoginLayout />,
@@ -104,62 +133,73 @@ export const router = createBrowserRouter(
             },
           ],
         },
-        dashboardRoutes,
+        // Protected routes - not accessible to ORGADMIN users
         {
-          path: '/',
-          element: <Root />,
+          element: <OrgAdminProtectedRoute />,
           children: [
             {
-              index: true,
-              element: <Navigate to="/c/new" replace={true} />,
+              path: 'admin',
+              element: <SuperAdminRoute />,
+              errorElement: <RouteErrorBoundary />,
             },
+            dashboardRoutes,
             {
-              path: 'c/:conversationId?',
-              element: <ChatRoute />,
-            },
-            {
-              path: 'search',
-              element: <Search />,
-            },
-            {
-              path: 'prompts',
-              element: <Navigate to="/prompts/new" replace={true} />,
-            },
-            {
-              path: 'prompts/new',
-              lazy: loadInlinePromptsView,
-            },
-            {
-              path: 'prompts/:promptId',
-              lazy: loadInlinePromptsView,
-            },
-            {
-              path: 'skills',
-              lazy: loadSkillsView,
-            },
-            {
-              path: 'skills/:skillId',
-              lazy: loadSkillsView,
-            },
-            {
-              path: 'skills/:skillId/edit',
-              lazy: loadSkillsView,
-            },
-            {
-              path: 'agents',
-              element: (
-                <MarketplaceProvider>
-                  <AgentMarketplace />
-                </MarketplaceProvider>
-              ),
-            },
-            {
-              path: 'agents/:category',
-              element: (
-                <MarketplaceProvider>
-                  <AgentMarketplace />
-                </MarketplaceProvider>
-              ),
+              path: '/',
+              element: <Root />,
+              children: [
+                {
+                  index: true,
+                  element: <Navigate to="/c/new" replace={true} />,
+                },
+                {
+                  path: 'c/:conversationId?',
+                  element: <ChatRoute />,
+                },
+                {
+                  path: 'search',
+                  element: <Search />,
+                },
+                {
+                  path: 'prompts',
+                  element: <Navigate to="/prompts/new" replace={true} />,
+                },
+                {
+                  path: 'prompts/new',
+                  lazy: loadInlinePromptsView,
+                },
+                {
+                  path: 'prompts/:promptId',
+                  lazy: loadInlinePromptsView,
+                },
+                {
+                  path: 'skills',
+                  lazy: loadSkillsView,
+                },
+                {
+                  path: 'skills/:skillId',
+                  lazy: loadSkillsView,
+                },
+                {
+                  path: 'skills/:skillId/edit',
+                  lazy: loadSkillsView,
+                },
+                {
+                  path: 'agents',
+                  element: (
+                    <MarketplaceProvider>
+                      <AgentMarketplace />
+                    </MarketplaceProvider>
+                  ),
+                },
+                {
+                  path: 'agents/:category',
+                  element: (
+                    <MarketplaceProvider>
+                      <AgentMarketplace />
+                    </MarketplaceProvider>
+                  ),
+                },
+              ],
             },
           ],
         },
