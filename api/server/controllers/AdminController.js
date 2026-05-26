@@ -2,8 +2,8 @@ const { SystemRoles } = require('librechat-data-provider');
 const { logger } = require('~/config');
 const { processGrantAdminAccess } = require('~/server/services/AdminService');
 const {
-  User,
   findUser,
+  findUsers,
   updateUser,
   findAdminInvitationByEmail,
   removeAdminRoleFromInvitation,
@@ -94,7 +94,10 @@ const revokeAdminAccessController = async (req, res) => {
  */
 const getAdminUsersController = async (req, res) => {
   try {
-    const adminUsers = await User.find({ role: SystemRoles.ADMIN }, { password: 0, totpSecret: 0 });
+    const adminUsers = await findUsers(
+      { role: SystemRoles.ADMIN },
+      { password: false, totpSecret: false },
+    );
     res.status(200).json(adminUsers);
   } catch (error) {
     logger.error('Error fetching admin users:', error);
