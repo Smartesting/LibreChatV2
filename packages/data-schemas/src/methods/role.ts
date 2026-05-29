@@ -12,7 +12,10 @@ import logger from '~/config/winston';
 const systemRoleValues = new Set<string>(Object.values(SystemRoles));
 
 /** Case-insensitive check — the legacy roles route uppercases params. */
-function isSystemRoleName(name: string): boolean {
+function isSystemRoleName(name: string | string[]): boolean {
+  if (Array.isArray(name)) {
+    return name.some((n) => systemRoleValues.has(n.toUpperCase()));
+  }
   return systemRoleValues.has(name.toUpperCase());
 }
 
@@ -451,7 +454,10 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
     }
     const Role = mongoose.models.Role;
     const User = mongoose.models.User as Model<IUser>;
-    await User.updateMany({ role: roleName }, { $set: { role: SystemRoles.USER } });
+    /* Remove the role from all users who have it */
+    await User.updateMany({ role: roleName }, { $pull: { role: roleName } });
+    /* If a user now has no roles, assign them the default USER role */
+    await User.updateMany({ role: { $size: 0 } }, { $set: { role: [SystemRoles.USER] } });
     const deleted = await Role.findOneAndDelete({ name: roleName }).lean();
     try {
       const cache = deps.getCache?.(CacheKeys.ROLES);
@@ -467,23 +473,43 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
     return deleted as IRole | null;
   }
 
-  async function updateUsersByRole(oldRole: string, newRole: string): Promise<void> {
+  async function updateUsersByRole(oldRole: string, newRole: string | string[]): Promise<void> {
     const User = mongoose.models.User as Model<IUser>;
-    await User.updateMany({ role: oldRole }, { $set: { role: newRole } });
+    const rolesToAdd = Array.isArray(newRole) ? newRole : [newRole];
+
+    /* Update users who have the old role: remove oldRole and add newRole(s) */
+    await User.updateMany(
+      { role: oldRole },
+      {
+        $pull: { role: oldRole },
+      },
+    );
+    await User.updateMany(
+      { _id: { $in: await findUserIdsByRole(oldRole) } }, // This is not ideal but $pull and $addToSet in same update can be tricky on same field
+      {
+        $addToSet: { role: { $each: rolesToAdd } },
+      },
+    );
+    /* For users that were updated and now have no roles, ensure they have at least one */
+    await User.updateMany({ role: { $size: 0 } }, { $set: { role: [SystemRoles.USER] } });
   }
 
   async function findUserIdsByRole(roleName: string): Promise<string[]> {
     const User = mongoose.models.User as Model<IUser>;
-    const users = await User.find({ role: roleName }).select('_id').lean();
+    const users = await User.find({ role: { $in: [roleName] } }).select('_id').lean();
     return users.map((u) => u._id.toString());
   }
 
-  async function updateUsersRoleByIds(userIds: string[], newRole: string): Promise<void> {
+  async function updateUsersRoleByIds(
+    userIds: string[],
+    newRole: string | string[],
+  ): Promise<void> {
     if (userIds.length === 0) {
       return;
     }
     const User = mongoose.models.User as Model<IUser>;
-    await User.updateMany({ _id: { $in: userIds } }, { $set: { role: newRole } });
+    const roles = Array.isArray(newRole) ? newRole : [newRole];
+    await User.updateMany({ _id: { $in: userIds } }, { $set: { role: roles } });
   }
 
   async function listUsersByRole(
@@ -493,7 +519,7 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
     const User = mongoose.models.User as Model<IUser>;
     const limit = options?.limit ?? 50;
     const offset = options?.offset ?? 0;
-    return await User.find({ role: roleName })
+    return await User.find({ role: { $in: [roleName] } })
       .select('_id name email avatar')
       .sort({ _id: 1 })
       .skip(offset)
@@ -503,7 +529,7 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
 
   async function countUsersByRole(roleName: string): Promise<number> {
     const User = mongoose.models.User as Model<IUser>;
-    return await User.countDocuments({ role: roleName });
+    return await User.countDocuments({ role: { $in: [roleName] } });
   }
 
   return {

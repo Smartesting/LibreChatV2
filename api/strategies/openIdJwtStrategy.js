@@ -122,7 +122,7 @@ const openIdJwtLogin = (openIdConfig) => {
             }
           }
           if (!user.role) {
-            user.role = SystemRoles.USER;
+            user.role = [SystemRoles.USER];
             updateData.role = user.role;
           }
 

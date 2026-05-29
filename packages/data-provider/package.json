@@ -16,7 +16,8 @@
       "import": "./dist/react-query/index.es.js",
       "require": "./dist/react-query/index.js",
       "types": "./dist/types/react-query/index.d.ts"
-    }
+    },
+    "./src/*": "./src/*"
   },
   "files": [
     "dist"

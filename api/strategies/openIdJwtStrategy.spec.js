@@ -145,7 +145,7 @@ describe('openIdJwtStrategy – token validation', () => {
     };
     const user = {
       _id: { toString: () => 'user-abc' },
-      role: SystemRoles.USER,
+      role: [SystemRoles.USER],
       provider: 'openid',
     };
     findOpenIDUser.mockResolvedValue({ user, error: null, migration: false });
@@ -168,7 +168,7 @@ describe('openIdJwtStrategy – token validation', () => {
 describe('openIdJwtStrategy – token source handling', () => {
   const baseUser = {
     _id: { toString: () => 'user-abc' },
-    role: SystemRoles.USER,
+    role: [SystemRoles.USER],
     provider: 'openid',
   };
 
@@ -336,7 +336,7 @@ describe('openIdJwtStrategy – OPENID_EMAIL_CLAIM', () => {
       openidId: payload.sub,
       openidIssuer: 'https://issuer.example.com',
       email: payload.email,
-      role: SystemRoles.USER,
+      role: [SystemRoles.USER],
     };
     findUser.mockImplementation(async (query) => {
       if (query.$or && query.$or.some((c) => c.openidId === payload.sub)) {
@@ -391,7 +391,7 @@ describe('openIdJwtStrategy – OPENID_EMAIL_CLAIM', () => {
       provider: 'openid',
       openidId: 'different-sub',
       email: payload.email,
-      role: SystemRoles.USER,
+      role: [SystemRoles.USER],
     };
 
     findUser.mockImplementation(async (query) => {
@@ -461,7 +461,7 @@ describe('openIdJwtStrategy – OPENID_EMAIL_CLAIM', () => {
       _id: 'legacy-db-id',
       email: 'legacy@corp.com',
       openidId: null,
-      role: SystemRoles.USER,
+      role: [SystemRoles.USER],
     };
 
     findUser.mockImplementation(async (query) => {

@@ -135,8 +135,8 @@ export function createAdminUsersHandlers(deps: AdminUsersDeps) {
       }
 
       const [targetUser] = await findUsers({ _id: id }, 'role', { limit: 1 });
-      if (targetUser?.role === SystemRoles.ADMIN) {
-        const adminCount = await countUsers({ role: SystemRoles.ADMIN });
+      if (targetUser?.role?.includes(SystemRoles.ADMIN)) {
+        const adminCount = await countUsers({ role: { $in: [SystemRoles.ADMIN] } });
         if (adminCount <= 1) {
           return res.status(400).json({ error: 'Cannot delete the last admin user' });
         }
@@ -148,8 +148,8 @@ export function createAdminUsersHandlers(deps: AdminUsersDeps) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      if (targetUser?.role === SystemRoles.ADMIN) {
-        const remaining = await countUsers({ role: SystemRoles.ADMIN });
+      if (targetUser?.role?.includes(SystemRoles.ADMIN)) {
+        const remaining = await countUsers({ role: { $in: [SystemRoles.ADMIN] } });
         if (remaining === 0) {
           logger.error(
             `[adminUsers] CRITICAL: last admin deleted via race condition, user: ${id}. ` +

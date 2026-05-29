@@ -1,6 +1,6 @@
 import mongoose, { FilterQuery } from 'mongoose';
 import type { RefillIntervalUnit } from 'librechat-data-provider';
-import type { IUser, BalanceConfig, CreateUserRequest, UserDeleteResult } from '~/types';
+import type { BalanceConfig, CreateUserRequest, IUser, UserDeleteResult } from '~/types';
 import { escapeRegExp } from '~/utils/string';
 import { signPayload } from '~/crypto';
 
@@ -145,6 +145,11 @@ export function createUserMethods(mongoose: typeof import('mongoose')) {
    */
   async function updateUser(userId: string, updateData: Partial<IUser>): Promise<IUser | null> {
     const User = mongoose.models.User;
+
+    if (updateData.role && !Array.isArray(updateData.role)) {
+      updateData.role = [updateData.role as unknown as string];
+    }
+
     const updateOperation = {
       $set: updateData,
       $unset: { expiresAt: '' }, // Remove the expiresAt field to prevent TTL

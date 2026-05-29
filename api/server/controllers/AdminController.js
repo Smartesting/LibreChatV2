@@ -55,8 +55,9 @@ const revokeAdminAccessController = async (req, res) => {
     if (user) {
       // If user exists and has ADMIN role, remove the role
       if (user.role.includes(SystemRoles.ADMIN)) {
+        const role = Array.isArray(user.role) ? user.role : [user.role];
         const updatedUser = await updateUser(user._id, {
-          role: user.role.filter((r) => r !== SystemRoles.ADMIN),
+          role: role.filter((r) => r !== SystemRoles.ADMIN),
         });
 
         if (!updatedUser) {
@@ -95,7 +96,7 @@ const revokeAdminAccessController = async (req, res) => {
 const getAdminUsersController = async (req, res) => {
   try {
     const adminUsers = await findUsers(
-      { role: SystemRoles.ADMIN },
+      { role: { $in: [SystemRoles.ADMIN] } },
       { password: false, totpSecret: false },
     );
     res.status(200).json(adminUsers);

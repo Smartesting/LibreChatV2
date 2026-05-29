@@ -62,8 +62,9 @@ const userSchema = new Schema<IUser>(
       default: 'local',
     },
     role: {
-      type: String,
-      default: SystemRoles.USER,
+      type: [String],
+      default: [],
+      enum: Object.values(SystemRoles),
     },
     googleId: {
       type: String,

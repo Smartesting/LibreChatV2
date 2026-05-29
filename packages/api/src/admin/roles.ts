@@ -9,7 +9,10 @@ import { parsePagination } from './pagination';
 const systemRoleValues = new Set<string>(Object.values(SystemRoles));
 
 /** Case-insensitive check — the legacy roles route uppercases params. */
-function isSystemRoleName(name: string): boolean {
+function isSystemRoleName(name: string | string[]): boolean {
+  if (Array.isArray(name)) {
+    return name.some((n) => systemRoleValues.has(n.toUpperCase()));
+  }
   return systemRoleValues.has(name.toUpperCase());
 }
 
@@ -96,10 +99,10 @@ export interface AdminRolesDeps {
     criteria: FilterQuery<IUser>,
     fields?: string | string[] | null,
   ) => Promise<IUser | null>;
-  updateUser: (userId: string, data: Partial<IUser>) => Promise<IUser | null>;
-  updateUsersByRole: (oldRole: string, newRole: string) => Promise<void>;
+  updateUser: (userId: string, data: Partial<IUser> | UpdateUserRequest) => Promise<IUser | null>;
+  updateUsersByRole: (oldRole: string, newRole: string | string[]) => Promise<void>;
   findUserIdsByRole: (roleName: string) => Promise<string[]>;
-  updateUsersRoleByIds: (userIds: string[], newRole: string) => Promise<void>;
+  updateUsersRoleByIds: (userIds: string[], newRole: string | string[]) => Promise<void>;
   listUsersByRole: (
     roleName: string,
     options?: { limit?: number; offset?: number },
@@ -467,27 +470,32 @@ export function createAdminRolesHandlers(deps: AdminRolesDeps) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      if (user.role === name) {
+      if (user.role?.includes(name as SystemRoles)) {
         return res.status(200).json({ success: true });
       }
 
-      if (user.role === SystemRoles.ADMIN && name !== SystemRoles.ADMIN) {
+      if (user.role?.includes(SystemRoles.ADMIN) && name !== SystemRoles.ADMIN) {
         const adminCount = await countUsersByRole(SystemRoles.ADMIN);
         if (adminCount <= 1) {
-          return res.status(400).json({ error: 'Cannot remove the last admin user' });
+          /* Check if user has other roles; if ADMIN is their only role, they are the last admin */
+          const hasOtherRoles = user.role.some((r) => r !== SystemRoles.ADMIN);
+          if (!hasOtherRoles) {
+            return res.status(400).json({ error: 'Cannot remove the last admin user' });
+          }
         }
       }
 
-      const updated = await updateUser(userId, { role: name });
+      const newRoles = Array.from(new Set([...(user.role ?? []), name as SystemRoles]));
+      const updated = await updateUser(userId, { role: newRoles });
       if (!updated) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      if (user.role === SystemRoles.ADMIN && name !== SystemRoles.ADMIN) {
+      if (user.role?.includes(SystemRoles.ADMIN) && !newRoles.includes(SystemRoles.ADMIN)) {
         const postCount = await countUsersByRole(SystemRoles.ADMIN);
         if (postCount === 0) {
           try {
-            await updateUser(userId, { role: SystemRoles.ADMIN });
+            await updateUser(userId, { role: user.role });
           } catch (rollbackError) {
             logger.error(
               `[adminRoles] CRITICAL: admin rollback failed in addRoleMember for user ${userId}:`,
@@ -530,7 +538,7 @@ export function createAdminRolesHandlers(deps: AdminRolesDeps) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      if (user.role !== name) {
+      if (!user.role?.includes(name as SystemRoles)) {
         return res.status(400).json({ error: 'User is not a member of this role' });
       }
 
@@ -541,16 +549,20 @@ export function createAdminRolesHandlers(deps: AdminRolesDeps) {
         }
       }
 
-      const removed = await updateUser(userId, { role: SystemRoles.USER });
+      let newRoles = (user.role ?? []).filter((r) => r !== name);
+      if (newRoles.length === 0) {
+        newRoles = [SystemRoles.USER];
+      }
+      const removed = await updateUser(userId, { role: newRoles });
       if (!removed) {
         return res.status(404).json({ error: 'User not found' });
       }
 
-      if (name === SystemRoles.ADMIN) {
+      if (user.role?.includes(SystemRoles.ADMIN) && !newRoles.includes(SystemRoles.ADMIN)) {
         const postCount = await countUsersByRole(SystemRoles.ADMIN);
         if (postCount === 0) {
           try {
-            await updateUser(userId, { role: SystemRoles.ADMIN });
+            await updateUser(userId, { role: user.role });
           } catch (rollbackError) {
             logger.error(
               `[adminRoles] CRITICAL: admin rollback failed for user ${userId}:`,

@@ -1,4 +1,4 @@
-import { PrincipalType } from 'librechat-data-provider';
+import { PrincipalType, SystemRoles } from 'librechat-data-provider';
 import {
   logger,
   isValidCapability,
@@ -53,7 +53,7 @@ export interface AdminGrantsDeps {
   }) => Promise<void>;
   getUserPrincipals: (params: {
     userId: string;
-    role?: string | null;
+    role?: SystemRoles[] | string[] | string | null;
     tenantId?: string;
   }) => Promise<ResolvedPrincipal[]>;
   hasCapabilityForPrincipals: (params: {
@@ -68,7 +68,7 @@ export interface AdminGrantsDeps {
   }) => Promise<Set<SystemCapability>>;
   getCachedPrincipals?: (user: {
     id: string;
-    role: string;
+    role: SystemRoles[];
     tenantId?: string;
   }) => ResolvedPrincipal[] | undefined;
   checkRoleExists?: (roleId: string) => Promise<boolean>;
@@ -107,7 +107,7 @@ export function createAdminGrantsHandlers(deps: AdminGrantsDeps) {
 
   function resolveUser(
     req: ServerRequest,
-  ): { userId: string; role: string; tenantId?: string } | null {
+  ): { userId: string; role: SystemRoles[]; tenantId?: string } | null {
     const user = req.user;
     if (!user) {
       return null;
@@ -121,7 +121,7 @@ export function createAdminGrantsHandlers(deps: AdminGrantsDeps) {
 
   async function resolvePrincipals(user: {
     userId: string;
-    role: string;
+    role: SystemRoles[];
     tenantId?: string;
   }): Promise<ResolvedPrincipal[]> {
     if (getCachedPrincipals) {

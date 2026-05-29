@@ -62,7 +62,7 @@ import {
 import { type AgentDeps, type AgentMethods, createAgentMethods } from './agent';
 /* Config */
 import { type ConfigMethods, createConfigMethods } from './config';
-import { createTrainingMethods, TrainingMethods } from '~/methods/training';
+import { createTrainingMethods, type TrainingDeps, type TrainingMethods } from '~/methods/training';
 import { createTrainingOrganizationMethods, TrainingOrganizationMethods } from '~/methods/trainingOrganization';
 import { createInvitationMethods, InvitationMethods } from '~/methods/invitation';
 
@@ -196,8 +196,15 @@ export function createMethods(
   };
   const agentMethods = createAgentMethods(mongoose, agentDeps);
 
+  const userMethods = createUserMethods(mongoose);
+
+  /* Smartesting */
+  const trainingMethods = createTrainingMethods(mongoose, {
+    deleteUserById: userMethods.deleteUserById,
+  });
+
   return {
-    ...createUserMethods(mongoose),
+    ...userMethods,
     ...createSessionMethods(mongoose),
     ...createTokenMethods(mongoose),
     ...roleMethods,
@@ -235,7 +242,7 @@ export function createMethods(
     /* Config */
     ...createConfigMethods(mongoose),
     /* Smartesting */
-    ...createTrainingMethods(mongoose),
+    ...trainingMethods,
     ...createTrainingOrganizationMethods(mongoose),
     ...createInvitationMethods(mongoose),
   };

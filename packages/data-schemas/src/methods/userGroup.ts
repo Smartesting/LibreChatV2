@@ -285,7 +285,7 @@ export function createUserGroupMethods(mongoose: typeof import('mongoose')) {
   async function getUserPrincipals(
     params: {
       userId: string | Types.ObjectId;
-      role?: string | null;
+      role?: string[] | string | null;
     },
     session?: ClientSession,
   ): Promise<Array<{ principalType: PrincipalType; principalId?: string | Types.ObjectId }>> {
@@ -310,8 +310,16 @@ export function createUserGroupMethods(mongoose: typeof import('mongoose')) {
     }
 
     // Add role as a principal if user has one
-    if (userRole && userRole.trim()) {
-      principals.push({ principalType: PrincipalType.ROLE, principalId: userRole });
+    if (userRole) {
+      if (Array.isArray(userRole)) {
+        userRole.forEach((r) => {
+          if (r && r.trim()) {
+            principals.push({ principalType: PrincipalType.ROLE, principalId: r });
+          }
+        });
+      } else if (userRole.trim()) {
+        principals.push({ principalType: PrincipalType.ROLE, principalId: userRole });
+      }
     }
 
     const userGroups = await getUserGroups(userId, session);

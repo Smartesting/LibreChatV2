@@ -4,12 +4,11 @@ import { DndProvider } from 'react-dnd';
 import { RouterProvider } from 'react-router-dom';
 import * as RadixToast from '@radix-ui/react-toast';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Toast, ThemeProvider, ToastProvider } from '@librechat/client';
-import { QueryClient, QueryClientProvider, QueryCache } from '@tanstack/react-query';
+import { ThemeProvider, Toast, ToastProvider } from '@librechat/client';
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ScreenshotProvider, useApiErrorBoundary } from './hooks';
 import WakeLockManager from '~/components/System/WakeLockManager';
-import { getThemeFromEnv } from './utils/getThemeFromEnv';
+import { getThemeFromEnv } from '~/utils/index.ts';
 import { initializeFontSize } from '~/store/fontSize';
 import { LiveAnnouncer } from '~/a11y';
 import { router } from './routes';
@@ -63,7 +62,6 @@ const App = () => {
                 <DndProvider backend={HTML5Backend}>
                   <RouterProvider router={router} />
                   <WakeLockManager />
-                  <ReactQueryDevtools initialIsOpen={false} position="top-right" />
                   <Toast />
                   <RadixToast.Viewport className="pointer-events-none fixed inset-0 z-[1000] mx-auto my-2 flex max-w-[560px] flex-col items-stretch justify-start md:pb-5" />
                 </DndProvider>

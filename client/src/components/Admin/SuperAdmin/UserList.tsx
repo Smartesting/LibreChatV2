@@ -193,7 +193,7 @@ const UserList: FC = () => {
                   {user.username}
                 </TableCell>
                 <TableCell className="hover:bg-surface text-text-primary">
-                  {getRoleName(user.role)}
+                  {user.role.map((role) => getRoleName(role)).join(' - ')}
                 </TableCell>
                 {user.role.toString() !== SystemRoles.TRAINEE && (
                   <TableCell className="hover:bg-surface text-text-primary">

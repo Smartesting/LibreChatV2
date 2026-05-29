@@ -1,5 +1,5 @@
 const { SystemRoles } = require('librechat-data-provider');
-const { sendEmail, checkEmailConfig } = require('~/server/utils');
+const { sendEmail } = require('~/server/utils');
 const { logger } = require('~/config');
 const {
   findUser,
@@ -13,6 +13,7 @@ const {
   findTrainingOrganizationsByAdmin,
   findTrainingOrganizationsByTrainer,
 } = require('~/models');
+const { checkEmailConfig } = require('@librechat/api');
 
 /**
  * Process administrators for a training organization
@@ -45,8 +46,9 @@ const processAdministrators = async (administrators, orgId, orgName) => {
 
       // Only add ORGADMIN role if the user doesn't already have it
       if (!existingUser.role.includes(SystemRoles.ORGADMIN)) {
+        const role = Array.isArray(existingUser.role) ? existingUser.role : [existingUser.role];
         await updateUser(existingUser._id, {
-          role: [...existingUser.role, SystemRoles.ORGADMIN],
+          role: [...role, SystemRoles.ORGADMIN],
         });
       }
 
@@ -172,8 +174,9 @@ const processTrainers = async (trainers, orgId, orgName) => {
 
       // Only add TRAINER role if the user doesn't already have it
       if (!existingUser.role.includes(SystemRoles.TRAINER)) {
+        const role = Array.isArray(existingUser.role) ? existingUser.role : [existingUser.role];
         await updateUser(existingUser._id, {
-          role: [...existingUser.role, SystemRoles.TRAINER],
+          role: [...role, SystemRoles.TRAINER],
         });
       }
 

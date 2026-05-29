@@ -76,8 +76,12 @@ const checkAddedConvoAccess = (requiredPermission) => async (req, res, next) => 
       });
     }
 
-    if (req.user.role !== SystemRoles.ADMIN) {
-      const role = await getRoleByName(req.user.role);
+    const roleArr = Array.isArray(req.user.role) ? req.user.role : [req.user.role];
+    const isAdmin = roleArr.includes(SystemRoles.ADMIN);
+
+    if (!isAdmin) {
+      const roleName = Array.isArray(req.user.role) ? req.user.role[0] : req.user.role;
+      const role = await getRoleByName(roleName);
       const hasMultiConvo = role?.permissions?.[PermissionTypes.MULTI_CONVO]?.[Permissions.USE];
       if (!hasMultiConvo) {
         return res.status(403).json({
@@ -92,7 +96,7 @@ const checkAddedConvoAccess = (requiredPermission) => async (req, res, next) => 
       return next();
     }
 
-    if (req.user.role === SystemRoles.ADMIN) {
+    if (isAdmin) {
       return next();
     }
 

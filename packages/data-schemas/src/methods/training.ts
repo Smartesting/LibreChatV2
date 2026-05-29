@@ -1,10 +1,20 @@
 import mongoose from 'mongoose';
+import crypto from 'node:crypto';
+import bcrypt from 'bcryptjs';
+import { SystemRoles, TrainingStatus } from 'librechat-data-provider';
 import { trainingSchema, userSchema } from '@librechat/data-schemas';
-import { TrainingStatus } from 'librechat-data-provider';
 const User = mongoose.model('user', userSchema);
 const Training = mongoose.model('training', trainingSchema);
 
-export function createTrainingMethods(mongoose: typeof import('mongoose')) {
+export type TrainingDeps = {
+  deleteUserById: (userId: mongoose.Types.ObjectId | string) => Promise<boolean>;
+};
+
+export function createTrainingMethods(
+  mongoose: typeof import('mongoose'),
+  deps: TrainingDeps = {} as TrainingDeps,
+) {
+  const { deleteUserById } = deps;
   /**
    * Create a training with the provided data.
    * @param {Object} trainingData - The training data to create.
@@ -166,6 +176,68 @@ export function createTrainingMethods(mongoose: typeof import('mongoose')) {
     }
   };
 
+  /**
+   * Generates trainee users with a specific role and random passwords.
+   * @param {number} count - The number of users to generate.
+   * @param {number} prevCount - The previous count of users for email generation.
+   * @returns {Promise<Array>} An array of generated users with their email, password, and ID.
+   */
+  const generateTraineeUsers = async (count: number, prevCount = 0) => {
+    const users: Array<{ email: string; password: string; id: string }> = [];
+
+    for (let i = prevCount; i < prevCount + count; i++) {
+      const now = Date.now().toString(36);
+      const email = `${i + 1}-${now}@smartesting.com`;
+
+      const password = crypto.randomBytes(8).toString('hex');
+      const salt = bcrypt.genSaltSync(10);
+
+      const userData = {
+        username: 'Training account',
+        email,
+        password: bcrypt.hashSync(password, salt),
+        provider: 'local',
+        role: [SystemRoles.TRAINEE],
+        emailVerified: true,
+      };
+
+      const user = await User.create(userData);
+
+      users.push({
+        email,
+        password,
+        id: user._id.toString(),
+      });
+    }
+
+    return users;
+  };
+
+  const removeExpiredTraineeAccounts = async () => {
+    console.log('[removeExpiredTraineeAccounts] Trying to remove expired trainee accounts');
+    const trainees = await User.find({
+      role: { $in: [SystemRoles.TRAINEE] },
+    });
+    const [ongoingTrainings, upcomingTrainings] = await Promise.all([
+      getOngoingTrainings(),
+      getUpcomingTrainings(),
+    ]);
+
+    const matchingUsers = trainees.filter((trainee) => {
+      const currentEmail = trainee.email;
+      const isUserInTraining = (training) =>
+        training.trainees.some((t) => t.username === currentEmail);
+      return !(ongoingTrainings.some(isUserInTraining) || upcomingTrainings.some(isUserInTraining));
+    });
+
+    console.log(`[removeExpiredTraineeAccounts] Accounts to delete: ${matchingUsers.length}`);
+
+    for (const user of matchingUsers) {
+      console.log(`[removeExpiredTraineeAccounts] Deleting trainee account ${user.email}`);
+      await deleteUserById(user._id);
+    }
+  };
+
   return {
     createTraining,
     getTrainingsByOrganization,
@@ -175,6 +247,8 @@ export function createTrainingMethods(mongoose: typeof import('mongoose')) {
     calculateTrainingStatus,
     getOngoingTrainings,
     getUpcomingTrainings,
+    generateTraineeUsers,
+    removeExpiredTraineeAccounts,
   };
 }
 

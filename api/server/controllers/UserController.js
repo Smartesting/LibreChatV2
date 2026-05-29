@@ -549,6 +549,20 @@ const maybeUninstallOAuthMCP = async (userId, pluginKey, appConfig) => {
   // 4. delete tokens from the DB and clear the flow state after revocation attempts
   await clearStoredMCPOAuthState(userId, serverName);
 };
+/**
+ * Get all users with their roles
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const getAllUsersController = async (req, res) => {
+  try {
+    const users = await db.findUsers({}, '-password -totpSecret -backupCodes');
+    res.status(200).json(users);
+  } catch (error) {
+    logger.error('Error fetching all users:', error);
+    res.status(500).json({ message: 'Error fetching all users' });
+  }
+};
 
 module.exports = {
   getUserController,
@@ -560,4 +574,5 @@ module.exports = {
   resendVerificationController,
   deleteUserMcpServers,
   maybeUninstallOAuthMCP,
+  getAllUsersController,
 };

@@ -1,13 +1,13 @@
+import type { AppConfig, ConfigSection, IConfig } from '@librechat/data-schemas';
 import { logger } from '@librechat/data-schemas';
+import type { TCustomConfig } from 'librechat-data-provider';
 import {
-  PrincipalType,
-  PrincipalModel,
   INTERFACE_PERMISSION_FIELDS,
   PERMISSION_SUB_KEYS,
+  PrincipalModel,
+  PrincipalType,
 } from 'librechat-data-provider';
-import type { TCustomConfig } from 'librechat-data-provider';
-import type { AppConfig, ConfigSection, IConfig } from '@librechat/data-schemas';
-import type { Types, ClientSession } from 'mongoose';
+import type { ClientSession, Types } from 'mongoose';
 import type { Response } from 'express';
 import type { CapabilityUser } from '~/middleware/capabilities';
 import type { ServerRequest } from '~/types/http';
@@ -105,7 +105,7 @@ export interface AdminConfigDeps {
     verb?: 'manage' | 'read',
   ) => Promise<boolean>;
   getAppConfig?: (options?: {
-    role?: string;
+    role?: string | string[];
     userId?: string;
     tenantId?: string;
   }) => Promise<AppConfig>;
@@ -149,7 +149,7 @@ function getCapabilityUser(req: ServerRequest): CapabilityUser | null {
   }
   return {
     id: req.user.id ?? req.user._id?.toString() ?? '',
-    role: req.user.role ?? '',
+    role: req.user.role ?? [],
     tenantId: (req.user as { tenantId?: string }).tenantId,
   };
 }

@@ -13,6 +13,7 @@ import type { SettingDefinition } from './generate';
 import type { TMinimalFeedback } from './feedback';
 import type { ContentTypes } from './types/runs';
 import type { Agent } from './types/assistants';
+import { SystemRoles } from 'src/roles';
 
 export * from './schemas';
 
@@ -211,7 +212,7 @@ export type TUser = {
   email: string;
   name: string;
   avatar: string;
-  role: string;
+  role: SystemRoles[];
   provider: string;
   plugins?: string[];
   twoFactorEnabled?: boolean;

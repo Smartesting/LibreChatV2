@@ -434,8 +434,9 @@ const removeOrgAdminRoleIfNecessary = async (user) => {
 
   // If the user is not an administrator of any organization, remove the orgadmin role
   if (orgsWithUserAsAdmin.length === 0 && user.role.includes(SystemRoles.ORGADMIN)) {
+    const role = Array.isArray(user.role) ? user.role : [user.role];
     await updateUser(user._id, {
-      role: user.role.filter((role) => role !== SystemRoles.ORGADMIN),
+      role: role.filter((role) => role !== SystemRoles.ORGADMIN),
     });
     logger.info(
       `Removed ${SystemRoles.ORGADMIN} role from user ${user.email} as he is no longer an administrator of any organization`,
@@ -448,8 +449,9 @@ const removeTrainerRoleIfNecessary = async (user) => {
 
   // If the user is not a trainer in any organization, remove the trainer role
   if (orgsWithUserAsTrainer.length === 0 && user.role.includes(SystemRoles.TRAINER)) {
+    const role = Array.isArray(user.role) ? user.role : [user.role];
     await updateUser(user._id, {
-      role: user.role.filter((role) => role !== SystemRoles.TRAINER),
+      role: role.filter((role) => role !== SystemRoles.TRAINER),
     });
     logger.info(
       `Removed ${SystemRoles.TRAINER} role from user ${user.email} as he is no longer a trainer in any organization`,

@@ -47,8 +47,9 @@ const processGrantAdminAccess = async (email) => {
         };
       }
 
+      const role = Array.isArray(existingUser.role) ? existingUser.role : [existingUser.role];
       const updatedUser = await updateUser(existingUser._id, {
-        role: [...existingUser.role, SystemRoles.ADMIN],
+        role: [...role, SystemRoles.ADMIN],
       });
 
       if (!updatedUser) {
