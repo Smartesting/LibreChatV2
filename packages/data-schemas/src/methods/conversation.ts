@@ -1,4 +1,4 @@
-import type { FilterQuery, Model, SortOrder } from 'mongoose';
+import type { DeleteResult, FilterQuery, Model, SortOrder } from 'mongoose';
 import { RetentionMode } from 'librechat-data-provider';
 import { createTempChatExpirationDate } from '~/utils/tempChatRetention';
 import { buildRetentionVisibilityFilter, createFallbackRetentionDate } from '~/utils/retention';
@@ -6,7 +6,6 @@ import { tenantSafeBulkWrite } from '~/utils/tenantBulkWrite';
 import logger from '~/config/winston';
 import type { AppConfig, IConversation } from '~/types';
 import type { MessageMethods } from './message';
-import type { DeleteResult } from 'mongoose';
 
 export interface ConversationMethods {
   getConvoFiles(conversationId: string): Promise<string[]>;
@@ -274,7 +273,7 @@ export function createConversationMethods(
         interfaceConfig?.retentionMode === RetentionMode.ALL &&
         typeof isTemporary !== 'boolean' &&
         (conversation.isTemporary == null ||
-          (conversation.isTemporary === false && conversation.$isDefault('isTemporary')))
+          (!conversation.isTemporary && conversation.$isDefault('isTemporary')))
       ) {
         await Conversation.updateOne(
           { _id: conversation._id, isTemporary: { $ne: false } },
@@ -311,8 +310,7 @@ export function createConversationMethods(
         },
       }));
 
-      const result = await tenantSafeBulkWrite(Conversation, bulkOps);
-      return result;
+      return await tenantSafeBulkWrite(Conversation, bulkOps);
     } catch (error) {
       logger.error('[bulkSaveConvos] Error saving conversations in bulk', error);
       throw new Error('Failed to save conversations in bulk.');
@@ -542,7 +540,11 @@ export function createConversationMethods(
       const conversationIds = conversations.map((c) => c.conversationId);
 
       if (!conversationIds.length) {
-        throw new Error('Conversation not found or already deleted.');
+        return {
+          acknowledged: true,
+          deletedCount: 0,
+          messages: { acknowledged: true, deletedCount: 0 },
+        };
       }
 
       const deleteConvoResult = await Conversation.deleteMany(userFilter);

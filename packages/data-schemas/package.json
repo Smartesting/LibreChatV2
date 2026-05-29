@@ -17,7 +17,8 @@
       "import": "./dist/admin/capabilities.es.js",
       "require": "./dist/admin/capabilities.cjs",
       "types": "./dist/types/admin/capabilities.d.ts"
-    }
+    },
+    "./src/*": "./src/*"
   },
   "files": [
     "dist"

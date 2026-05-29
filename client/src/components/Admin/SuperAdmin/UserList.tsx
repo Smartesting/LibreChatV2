@@ -37,6 +37,8 @@ const UserList: FC = () => {
           return smaLocalize('com_userlist_role_trainer');
         case SystemRoles.TRAINEE:
           return smaLocalize('com_userlist_role_trainee');
+        case SystemRoles.USER:
+          return smaLocalize('com_userlist_role_user');
         default:
           return role;
       }
