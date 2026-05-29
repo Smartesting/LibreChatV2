@@ -7,6 +7,7 @@ import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize, useSmaLocalize } from '~/hooks';
 import Settings from './Settings';
+import { SystemRoles } from 'librechat-data-provider';
 
 function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const localize = useLocalize();
@@ -14,7 +15,7 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const { user, isAuthenticated, logout } = useAuthContext();
   const { data: startupConfig } = useGetStartupConfig();
   const balanceQuery = useGetUserBalance({
-    enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
+    enabled: isAuthenticated && startupConfig?.balance?.enabled,
   });
   const [showSettings, setShowSettings] = useState(false);
   const [showFiles, setShowFiles] = useState(false);
@@ -70,13 +71,21 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             <DropdownMenuSeparator />
           </>
         )}
-        <Menu.MenuItem
-          onClick={() => (window.location.href = '/admin')}
-          className="select-item text-sm"
-        >
-          <FileText className="icon-md" aria-hidden="true" />
-          {smaLocalize('com_nav_admin')}
-        </Menu.MenuItem>
+        {user?.role.some((userRole) =>
+          [SystemRoles.ADMIN, SystemRoles.ORGADMIN].includes(userRole),
+        ) && (
+          <Menu.MenuItem
+            onClick={() =>
+              (window.location.href = user?.role.includes(SystemRoles.ADMIN)
+                ? '/admin'
+                : '/training-organizations')
+            }
+            className="select-item text-sm"
+          >
+            <FileText className="icon-md" aria-hidden="true" />
+            {smaLocalize('com_nav_admin')}
+          </Menu.MenuItem>
+        )}
         <Menu.MenuItem onClick={() => setShowFiles(true)} className="select-item text-sm">
           <FileText className="icon-md" aria-hidden="true" />
           {localize('com_nav_my_files')}
