@@ -254,7 +254,6 @@ export const roleDefaults = defaultRolesSchema.parse({
       [PermissionTypes.RUN_CODE]: {
         [Permissions.USE]: false,
       },
-      //TODO ARC: Update this
       [PermissionTypes.MEMORIES]: {},
       [PermissionTypes.WEB_SEARCH]: {},
       [PermissionTypes.PEOPLE_PICKER]: {},

@@ -5,7 +5,6 @@ import { logger } from '~/index';
 
 const TrainingOrganization = mongoose.model('trainingOrganization', trainingOrganizationSchema);
 
-//TODO ARC: mongoose usage ?
 export function createTrainingOrganizationMethods(mongoose: typeof import('mongoose')) {
   /**
    * Create a training organization with the provided data.
