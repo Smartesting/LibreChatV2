@@ -47,6 +47,7 @@ router.post(
   middleware.checkBan,
   ldapAuth ? middleware.requireLdapAuth : middleware.requireLocalAuth,
   setBalanceConfig,
+  middleware.checkTrainingAccess,
   loginController,
 );
 router.post('/refresh', refreshController);

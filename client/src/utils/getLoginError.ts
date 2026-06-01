@@ -11,6 +11,9 @@ const getLoginError = (errorText: string): TranslationKeys => {
     case errorText.includes('429'):
       return 'com_auth_error_login_rl';
     case errorText.includes('403'):
+      if (errorText.includes('no_ongoing_training')) {
+        return 'com_auth_error_no_training';
+      }
       return 'com_auth_error_login_ban';
     case errorText.includes('500'):
       return 'com_auth_error_login_server';

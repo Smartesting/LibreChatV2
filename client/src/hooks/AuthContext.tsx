@@ -1,24 +1,24 @@
+import type { ReactNode } from 'react';
 import {
-  useRef,
-  useMemo,
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
   createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from 'react';
 import { debounce } from 'lodash';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { useNavigate } from 'react-router-dom';
+import type * as t from 'librechat-data-provider';
 import {
   apiBaseUrl,
-  SystemRoles,
-  setTokenHeader,
-  isSystemRoleName,
   buildLoginRedirectUrl,
+  isSystemRoleName,
+  setTokenHeader,
+  SystemRoles,
 } from 'librechat-data-provider';
-import type * as t from 'librechat-data-provider';
-import type { ReactNode } from 'react';
 import {
   useGetRole,
   useGetUserQuery,
@@ -26,8 +26,8 @@ import {
   useLogoutUserMutation,
   useRefreshTokenMutation,
 } from '~/data-provider';
-import { TAuthConfig, TUserContext, TAuthContext, TResError } from '~/common';
-import { SESSION_KEY, isSafeRedirect, getPostLoginRedirect } from '~/utils';
+import { TAuthConfig, TAuthContext, TResError, TUserContext } from '~/common';
+import { getPostLoginRedirect, isSafeRedirect, SESSION_KEY } from '~/utils';
 import useTimeout from './useTimeout';
 import store from '~/store';
 
@@ -56,7 +56,9 @@ const AuthContextProvider = ({
   const isCustomRole = isAuthenticated && !!user?.role && !isSystemRoleName(user.role);
 
   const { data: userRole = null } = useGetRole(SystemRoles.USER, {
-    enabled: !!(isAuthenticated && (Array.isArray(user?.role) ? user.role.length > 0 : !!user?.role)),
+    enabled: !!(
+      isAuthenticated && (Array.isArray(user?.role) ? user.role.length > 0 : !!user?.role)
+    ),
   });
   const { data: adminRole = null } = useGetRole(SystemRoles.ADMIN, {
     enabled: !!(
@@ -117,18 +119,11 @@ const AuthContextProvider = ({
     },
     onError: (error: TResError | unknown) => {
       const resError = error as TResError;
-      doSetError(resError.message);
-      // Preserve a valid redirect_to across login failures so the deep link survives retries.
-      // Cannot use buildLoginRedirectUrl() here — it reads the current pathname (already /login)
-      // and would return plain /login, dropping the redirect_to destination.
-      const redirectTo = new URLSearchParams(window.location.search).get('redirect_to');
-      const loginPath =
-        redirectTo && isSafeRedirect(redirectTo)
-          ? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
-          : '/login';
-      navigate(loginPath, { replace: true });
+      doSetError(`${resError.response.data.message} (${resError.message})`);
+      navigate('/login', { replace: true });
     },
   });
+
   const logoutUser = useLogoutUserMutation({
     onSuccess: (data) => {
       if (data.redirect) {
