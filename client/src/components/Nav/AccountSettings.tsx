@@ -1,7 +1,7 @@
 import { memo, useRef, useState } from 'react';
 import * as Menu from '@ariakit/react/menu';
-import { FileText, LogOut } from 'lucide-react';
-import { Avatar, DropdownMenuSeparator, GearIcon, LinkIcon } from '@librechat/client';
+import { FileText, LogOut, ShieldEllipsis } from 'lucide-react';
+import { Avatar, DropdownMenuSeparator, GearIcon } from '@librechat/client';
 import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
 import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
@@ -71,6 +71,14 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             <DropdownMenuSeparator />
           </>
         )}
+        <Menu.MenuItem onClick={() => setShowFiles(true)} className="select-item text-sm">
+          <FileText className="icon-md" aria-hidden="true" />
+          {localize('com_nav_my_files')}
+        </Menu.MenuItem>
+        <Menu.MenuItem onClick={() => setShowSettings(true)} className="select-item text-sm">
+          <GearIcon className="icon-md" aria-hidden="true" />
+          {localize('com_nav_settings')}
+        </Menu.MenuItem>
         {user?.role.some((userRole) =>
           [SystemRoles.ADMIN, SystemRoles.ORGADMIN].includes(userRole),
         ) && (
@@ -82,27 +90,10 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
             }
             className="select-item text-sm"
           >
-            <FileText className="icon-md" aria-hidden="true" />
+            <ShieldEllipsis className="icon-md" aria-hidden="true" />
             {smaLocalize('com_nav_admin')}
           </Menu.MenuItem>
         )}
-        <Menu.MenuItem onClick={() => setShowFiles(true)} className="select-item text-sm">
-          <FileText className="icon-md" aria-hidden="true" />
-          {localize('com_nav_my_files')}
-        </Menu.MenuItem>
-        {startupConfig?.helpAndFaqURL !== '/' && (
-          <Menu.MenuItem
-            onClick={() => window.open(startupConfig?.helpAndFaqURL, '_blank')}
-            className="select-item text-sm"
-          >
-            <LinkIcon aria-hidden="true" />
-            {localize('com_nav_help_faq')}
-          </Menu.MenuItem>
-        )}
-        <Menu.MenuItem onClick={() => setShowSettings(true)} className="select-item text-sm">
-          <GearIcon className="icon-md" aria-hidden="true" />
-          {localize('com_nav_settings')}
-        </Menu.MenuItem>
         <DropdownMenuSeparator />
         <Menu.MenuItem onClick={() => logout()} className="select-item text-sm">
           <LogOut className="icon-md" aria-hidden="true" />
