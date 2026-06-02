@@ -1,10 +1,11 @@
-import React, { useEffect, memo } from 'react';
+import React, { memo, useContext, useEffect } from 'react';
 import TagManager from 'react-gtm-module';
 import ReactMarkdown from 'react-markdown';
-import { Constants } from 'librechat-data-provider';
 import type { TStartupConfig } from 'librechat-data-provider';
+import { Constants } from 'librechat-data-provider';
 import { useGetStartupConfig } from '~/data-provider';
 import { useLocalize } from '~/hooks';
+import { isDark, ThemeContext } from '@librechat/client';
 
 type FooterProps = {
   className?: string;
@@ -12,6 +13,9 @@ type FooterProps = {
 };
 
 function Footer({ className, startupConfig }: FooterProps) {
+  const { theme } = useContext(ThemeContext);
+  const isDarkMode = isDark(theme);
+
   const shouldFetchConfig = startupConfig === undefined;
   const { data: fetchedConfig } = useGetStartupConfig({ enabled: shouldFetchConfig });
   const config = shouldFetchConfig ? fetchedConfig : startupConfig;
@@ -52,26 +56,35 @@ function Footer({ className, startupConfig }: FooterProps) {
 
   const mainContentRender = mainContentParts.map((text, index) => (
     <React.Fragment key={`main-content-part-${index}`}>
-      <ReactMarkdown
-        components={{
-          a: ({ node: _n, href, children, ...otherProps }) => {
-            return (
-              <a
-                className="text-text-secondary underline"
-                href={href}
-                rel="noreferrer"
-                {...otherProps}
-              >
-                {children}
-              </a>
-            );
-          },
+      <div className="flex flex-col items-center justify-center">
+        <img
+          src={isDarkMode ? '/assets/logo-smartesting.svg' : '/assets/logo-smartesting-bleu.svg'}
+          alt="Smartesting logo"
+          width={120}
+          className="mb-2"
+        />
+        <ReactMarkdown
+          components={{
+            a: ({ node: _n, href, children, ...otherProps }) => {
+              return (
+                <a
+                  className="text-text-secondary underline"
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  {...otherProps}
+                >
+                  {children}
+                </a>
+              );
+            },
 
-          p: ({ node: _n, ...props }) => <span {...props} />,
-        }}
-      >
-        {text.trim()}
-      </ReactMarkdown>
+            p: ({ node: _n, ...props }) => <span {...props} />,
+          }}
+        >
+          {text.trim()}
+        </ReactMarkdown>
+      </div>
     </React.Fragment>
   ));
 
