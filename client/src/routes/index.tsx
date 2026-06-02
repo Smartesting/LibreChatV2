@@ -196,6 +196,9 @@ export const router = createBrowserRouter(
                   <AgentMarketplace />
                 </MarketplaceProvider>
               ),
+            },
+          ],
+        },
         // Protected routes - not accessible to ORGADMIN users
         {
           element: <OrgAdminProtectedRoute />,
