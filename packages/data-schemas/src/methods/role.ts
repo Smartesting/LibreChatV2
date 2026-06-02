@@ -7,6 +7,7 @@ import {
 } from 'librechat-data-provider';
 import type { Model } from 'mongoose';
 import type { IRole, IUser } from '~/types';
+import { scopedCacheKey } from '~/config/tenantContext';
 import logger from '~/config/winston';
 
 const systemRoleValues = new Set<string>(Object.values(SystemRoles));
@@ -102,7 +103,7 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
     const cache = deps.getCache?.(CacheKeys.ROLES);
     try {
       if (cache) {
-        const cachedRole = await cache.get(roleName);
+        const cachedRole = await cache.get(scopedCacheKey(roleName));
         if (cachedRole) {
           return cachedRole as IRole;
         }
@@ -117,12 +118,12 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
       if (!role && systemRoleValues.has(roleName)) {
         const newRole = await new Role(roleDefaults[roleName as keyof typeof roleDefaults]).save();
         if (cache) {
-          await cache.set(roleName, newRole);
+          await cache.set(scopedCacheKey(roleName), newRole);
         }
         return newRole.toObject() as IRole;
       }
       if (cache) {
-        await cache.set(roleName, role);
+        await cache.set(scopedCacheKey(roleName), role);
       }
       return role as unknown as IRole;
     } catch (error) {
@@ -143,9 +144,12 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
         .exec();
       if (cache) {
         if (updates.name && updates.name !== roleName) {
-          await Promise.all([cache.set(roleName, null), cache.set(updates.name, role)]);
+          await Promise.all([
+            cache.set(scopedCacheKey(roleName), null),
+            cache.set(scopedCacheKey(updates.name), role),
+          ]);
         } else {
-          await cache.set(roleName, role);
+          await cache.set(scopedCacheKey(roleName), role);
         }
       }
       return role as unknown as IRole;
@@ -304,7 +308,7 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
             const cache = deps.getCache?.(CacheKeys.ROLES);
             const updatedRole = await Role.findOne({ name: roleName }).select('-__v').lean().exec();
             if (cache) {
-              await cache.set(roleName, updatedRole);
+              await cache.set(scopedCacheKey(roleName), updatedRole);
             }
 
             logger.info(`Updated role '${roleName}' and removed old schema fields`);
@@ -374,7 +378,7 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
             const cache = deps.getCache?.(CacheKeys.ROLES);
             if (cache) {
               const updatedRole = await Role.findById(role._id).lean().exec();
-              await cache.set(role.name, updatedRole);
+              await cache.set(scopedCacheKey(role.name), updatedRole);
             }
 
             migratedCount++;
@@ -426,7 +430,7 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
     try {
       const cache = deps.getCache?.(CacheKeys.ROLES);
       if (cache) {
-        await cache.set(role.name, role.toObject());
+        await cache.set(scopedCacheKey(role.name), role.toObject());
       }
     } catch (cacheError) {
       logger.error(`[createRoleByName] cache set failed for "${role.name}":`, cacheError);
@@ -465,7 +469,7 @@ export function createRoleMethods(mongoose: typeof import('mongoose'), deps: Rol
         // Setting null evicts the stale document. getRoleByName treats falsy cached
         // values as a miss and falls through to the DB, so this does not provide
         // negative caching — it only prevents serving the pre-deletion document.
-        await cache.set(roleName, null);
+        await cache.set(scopedCacheKey(roleName), null);
       }
     } catch (cacheError) {
       logger.error(`[deleteRoleByName] cache invalidation failed for "${roleName}":`, cacheError);

@@ -12,6 +12,7 @@ import { MarketplaceProvider } from '~/components/Agents/MarketplaceContext';
 import AgentMarketplace from '~/components/Agents/Marketplace';
 import { OAuthError, OAuthSuccess } from '~/components/OAuth';
 import { AuthContextProvider } from '~/hooks/AuthContext';
+import WithRum from '~/lib/rum/WithRum';
 import RouteErrorBoundary from './RouteErrorBoundary';
 import StartupLayout from './Layouts/Startup';
 import LoginLayout from './Layouts/Login';
@@ -30,7 +31,9 @@ import TrainerInvite from '~/components/Auth/TrainerInvite';
 
 const AuthLayout = () => (
   <AuthContextProvider>
-    <Outlet />
+    <WithRum>
+      <Outlet />
+    </WithRum>
     <ApiErrorWatcher />
   </AuthContextProvider>
 );
@@ -133,6 +136,66 @@ export const router = createBrowserRouter(
             },
           ],
         },
+        dashboardRoutes,
+        {
+          path: '/',
+          element: <Root />,
+          children: [
+            {
+              index: true,
+              element: <Navigate to="/c/new" replace={true} />,
+            },
+            {
+              path: 'c/:conversationId?',
+              element: <ChatRoute />,
+            },
+            {
+              path: 'search',
+              element: <Search />,
+            },
+            {
+              path: 'prompts',
+              element: <Navigate to="/prompts/new" replace={true} />,
+            },
+            {
+              path: 'prompts/new',
+              lazy: loadInlinePromptsView,
+            },
+            {
+              path: 'prompts/:promptId',
+              lazy: loadInlinePromptsView,
+            },
+            {
+              path: 'skills',
+              lazy: loadSkillsView,
+            },
+            {
+              path: 'skills/new',
+              lazy: loadSkillsView,
+            },
+            {
+              path: 'skills/:skillId',
+              lazy: loadSkillsView,
+            },
+            {
+              path: 'skills/:skillId/edit',
+              lazy: loadSkillsView,
+            },
+            {
+              path: 'agents',
+              element: (
+                <MarketplaceProvider>
+                  <AgentMarketplace />
+                </MarketplaceProvider>
+              ),
+            },
+            {
+              path: 'agents/:category',
+              element: (
+                <MarketplaceProvider>
+                  <AgentMarketplace />
+                </MarketplaceProvider>
+              ),
         // Protected routes - not accessible to ORGADMIN users
         {
           element: <OrgAdminProtectedRoute />,

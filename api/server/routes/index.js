@@ -37,8 +37,10 @@ const trainingOrganizations = require('./trainingOrganizations');
 const trainings = require('./trainings');
 const admins = require('./admins');
 const invitations = require('./invitations');
+const rum = require('./rum');
 
 module.exports = {
+  rum,
   mcp,
   auth,
   adminAuth,
