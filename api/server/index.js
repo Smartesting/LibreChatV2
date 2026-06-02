@@ -45,6 +45,7 @@ const { getAppConfig } = require('./services/Config');
 const staticCache = require('./utils/staticCache');
 const noIndex = require('./middleware/noIndex');
 const routes = require('./routes');
+const { startCrons } = require('~/server/cron');
 
 const { PORT, HOST, ALLOW_SOCIAL_LOGIN, DISABLE_COMPRESSION, TRUST_PROXY } = process.env ?? {};
 
@@ -321,6 +322,7 @@ startServer().catch((err) => {
   logger.error('Failed to start server:', err);
   process.exit(1);
 });
+startCrons();
 
 let messageCount = 0;
 process.on('uncaughtException', (err) => {
