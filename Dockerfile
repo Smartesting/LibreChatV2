@@ -24,7 +24,7 @@ WORKDIR /app
 
 USER node
 
-COPY --chown=node:node package.json package-lock.json librechat.yaml ./
+COPY --chown=node:node package.json package-lock.json ./
 COPY --chown=node:node api/package.json ./api/package.json
 COPY --chown=node:node client/package.json ./client/package.json
 COPY --chown=node:node packages/data-provider/package.json ./packages/data-provider/package.json
@@ -32,9 +32,7 @@ COPY --chown=node:node packages/data-schemas/package.json ./packages/data-schema
 COPY --chown=node:node packages/api/package.json ./packages/api/package.json
 
 RUN \
-    # Allow mounting of these files, which have no default
     touch .env ; \
-    # Create directories for the volumes to inherit the correct permissions
     mkdir -p /app/client/public/images /app/logs /app/uploads ; \
     npm config set fetch-retry-maxtimeout 600000 ; \
     npm config set fetch-retries 5 ; \
@@ -54,16 +52,11 @@ RUN \
 COPY --chown=node:node . .
 
 RUN \
-    # React client build with configurable memory
     NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}" npm run frontend; \
     npm prune --production; \
     npm cache clean --force
 
 # Optional build metadata surfaced in Settings -> About for support triage.
-# Declared here (after the heavy install/build steps) so that commit/date
-# changing on every CI run does not bust the cache for dependency install
-# and frontend build layers. When unset, the backend falls back to local
-# git resolution (if .git is present), and finally to empty values.
 ARG BUILD_COMMIT=
 ARG BUILD_BRANCH=
 ARG BUILD_DATE=
@@ -74,6 +67,7 @@ ENV BUILD_DATE=${BUILD_DATE}
 # Node API setup
 EXPOSE 3080
 ENV HOST=0.0.0.0
+ENV CONFIG_PATH="/app/librechat.yaml"
 CMD ["npm", "run", "backend"]
 
 # Optional: for client with nginx routing
