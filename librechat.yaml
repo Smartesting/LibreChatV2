@@ -40,7 +40,11 @@ endpoints:
       apiKey: '${MISTRAL_API_KEY}'
       baseURL: 'https://api.mistral.ai/v1'
       models:
-        default: ['mistral-tiny', 'mistral-small', 'mistral-medium']
+        default:
+          - mistral-small-latest
+          - mistral-medium-latest
+          - devstral-small-latest
+        fetch: false
       titleConvo: true # Set to true to enable title conversation
       titleModel: 'mistral-tiny' # Defaults to "gpt-3.5-turbo" if omitted.
       # The label displayed for the AI model in messages.
@@ -54,7 +58,10 @@ endpoints:
       apiKey: "${DEEPSEEK_API_KEY}"
       baseURL: "https://api.deepseek.com"
       models:
-        default: ['deepseek-v4-flash', 'deepseek-v4-pro']
+        default:
+          - deepseek-v4-flash
+          - deepseek-v4-pro
+        fetch: false
       titleConvo: true
       titleModel: "deepseek-chat"
       modelDisplayLabel: "DeepSeek"
