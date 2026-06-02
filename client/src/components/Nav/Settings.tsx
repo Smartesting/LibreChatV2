@@ -88,57 +88,10 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
       label: 'com_nav_setting_general',
     },
     {
-      value: SettingsTabValues.CHAT,
-      icon: <MessageSquare className="icon-sm" aria-hidden="true" />,
-      label: 'com_nav_setting_chat',
-    },
-    {
-      value: SettingsTabValues.COMMANDS,
-      icon: <Command className="icon-sm" aria-hidden="true" />,
-      label: 'com_nav_commands',
-    },
-    {
       value: SettingsTabValues.SPEECH,
       icon: <SpeechIcon className="icon-sm" aria-hidden="true" />,
       label: 'com_nav_setting_speech',
     },
-    ...(hasAnyPersonalizationFeature
-      ? [
-          {
-            value: SettingsTabValues.PERSONALIZATION,
-            icon: <PersonalizationIcon />,
-            label: 'com_nav_setting_personalization' as TranslationKeys,
-          },
-        ]
-      : []),
-    {
-      value: SettingsTabValues.DATA,
-      icon: <DataIcon />,
-      label: 'com_nav_setting_data',
-    },
-    ...(startupConfig?.balance?.enabled
-      ? [
-          {
-            value: SettingsTabValues.BALANCE,
-            icon: <DollarSign size={18} />,
-            label: 'com_nav_setting_balance' as TranslationKeys,
-          },
-        ]
-      : ([] as { value: SettingsTabValues; icon: React.JSX.Element; label: TranslationKeys }[])),
-    {
-      value: SettingsTabValues.ACCOUNT,
-      icon: <UserIcon />,
-      label: 'com_nav_setting_account',
-    },
-    ...(aboutEnabled
-      ? [
-          {
-            value: SettingsTabValues.ABOUT,
-            icon: <Info className="icon-sm" aria-hidden="true" />,
-            label: 'com_nav_setting_about' as TranslationKeys,
-          },
-        ]
-      : ([] as { value: SettingsTabValues; icon: React.JSX.Element; label: TranslationKeys }[])),
   ];
 
   const handleTabChange = (value: string) => {
