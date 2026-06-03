@@ -92,7 +92,7 @@ const UserList: FC = () => {
       return (
         user.email?.toLowerCase().includes(searchTermLower) ||
         user.username?.toLowerCase().includes(searchTermLower) ||
-        getRoleName(user.role)?.toLowerCase().includes(searchTermLower)
+        user.role.some((role) => getRoleName(role)?.toLowerCase().includes(searchTermLower))
       );
     });
 
