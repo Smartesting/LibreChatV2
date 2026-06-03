@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
   Select,
   SelectArrow,
@@ -8,28 +8,19 @@ import {
   SelectPopover,
   SelectProvider,
 } from '@ariakit/react';
-import './AnimatePopover.css';
 import { cn } from '~/utils';
 
-type MultiSelectItem<T extends string> = T | { label: string; value: T };
-
-function getItemValue<T extends string>(item: MultiSelectItem<T>): T {
-  return typeof item === 'string' ? item : item.value;
-}
-
-function getItemLabel<T extends string>(item: MultiSelectItem<T>): string {
-  return typeof item === 'string' ? item : item.label;
-}
-
 interface MultiSelectProps<T extends string> {
-  items: MultiSelectItem<T>[];
+  items: T[];
   label?: string;
   placeholder?: string;
+  selectedItemsText?: string;
+  defaultSelectedValues?: T[];
   onSelectedValuesChange?: (values: T[]) => void;
   renderSelectedValues?: (
     values: T[],
     placeholder?: string,
-    items?: MultiSelectItem<T>[],
+    selectedItemsText?: string,
   ) => React.ReactNode;
   className?: string;
   itemClassName?: string;
@@ -40,38 +31,33 @@ interface MultiSelectProps<T extends string> {
   selectItemsClassName?: string;
   selectedValues: T[];
   setSelectedValues: (values: T[]) => void;
-  renderItemContent?: (
-    value: T,
-    defaultContent: React.ReactNode,
-    isSelected: boolean,
-  ) => React.ReactNode;
+  disabled?: boolean;
+  displayValues?: boolean;
 }
 
 function defaultRender<T extends string>(
   values: T[],
   placeholder?: string,
-  items?: MultiSelectItem<T>[],
+  selectedItemsText?: string,
+  displayValues?: boolean,
 ) {
   if (values.length === 0) {
     return placeholder || 'Select...';
   }
   if (values.length === 1) {
-    // Find the item to get its label
-    if (items) {
-      const item = items.find((item) => getItemValue(item) === values[0]);
-      if (item) {
-        return getItemLabel(item);
-      }
-    }
     return values[0];
   }
-  return `${values.length} items selected`;
+  if (displayValues) {
+    return values.join(', ');
+  }
+  return `${values.length} ${selectedItemsText || 'items selected'}`;
 }
 
 export default function MultiSelect<T extends string>({
   items,
   label,
   placeholder = 'Select...',
+  selectedItemsText = '',
   onSelectedValuesChange,
   renderSelectedValues = defaultRender,
   className,
@@ -83,11 +69,10 @@ export default function MultiSelect<T extends string>({
   selectItemsClassName,
   selectedValues = [],
   setSelectedValues,
-  renderItemContent,
+  disabled = false,
+  displayValues = false,
 }: MultiSelectProps<T>) {
   const selectRef = useRef<HTMLButtonElement>(null);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
   const handleValueChange = (values: T[]) => {
     setSelectedValues(values);
     if (onSelectedValuesChange) {
@@ -97,38 +82,29 @@ export default function MultiSelect<T extends string>({
 
   return (
     <div className={className}>
-      <SelectProvider
-        value={selectedValues}
-        setValue={handleValueChange}
-        open={isPopoverOpen}
-        setOpen={setIsPopoverOpen}
-      >
+      <SelectProvider value={selectedValues} setValue={handleValueChange}>
         {label && (
           <SelectLabel className={cn('mb-1 block text-sm text-text-primary', labelClassName)}>
             {label}
           </SelectLabel>
         )}
         <Select
+          disabled={disabled}
           ref={selectRef}
           className={cn(
             'flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm',
             'bg-surface-tertiary text-text-primary shadow-sm hover:cursor-pointer hover:bg-surface-hover',
-            'outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+            'outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75',
             selectClassName,
             selectedValues.length > 0 && selectItemsClassName != null && selectItemsClassName,
           )}
           onChange={(e) => e.stopPropagation()}
         >
-          {selectIcon && <span>{selectIcon as React.JSX.Element}</span>}
+          {selectIcon && selectIcon}
           <span className="mr-auto hidden truncate md:block">
-            {renderSelectedValues(selectedValues, placeholder, items)}
+            {renderSelectedValues(selectedValues, placeholder, selectedItemsText, displayValues)}
           </span>
-          <SelectArrow
-            className={cn(
-              'ml-1 hidden stroke-1 text-base opacity-75 transition-transform duration-300 md:block',
-              isPopoverOpen && 'rotate-180',
-            )}
-          />
+          <SelectArrow className="ml-1 hidden stroke-1 text-base opacity-75 md:block" />
         </Select>
         <SelectPopover
           gutter={4}
@@ -145,39 +121,23 @@ export default function MultiSelect<T extends string>({
             popoverClassName,
           )}
         >
-          {items.map((item) => {
-            const value = getItemValue(item);
-            const label = getItemLabel(item);
-            const defaultContent = (
-              <>
-                <SelectItemCheck className="mr-0.5 text-primary" />
-                <span className="truncate">{label}</span>
-              </>
-            );
-            const isCurrentItemSelected = selectedValues.includes(value);
-            return (
-              <SelectItem
-                key={value}
-                value={value}
-                className={cn(
-                  'z-50 flex items-center gap-2 rounded-lg px-2 py-1.5 hover:cursor-pointer',
-                  'scroll-m-1 outline-none transition-colors',
-                  'hover:bg-black/[0.075] dark:hover:bg-white/10',
-                  'data-[active-item]:bg-black/[0.075] dark:data-[active-item]:bg-white/10',
-                  'w-full min-w-0 text-sm',
-                  itemClassName,
-                )}
-              >
-                {renderItemContent
-                  ? (renderItemContent(
-                      value,
-                      defaultContent,
-                      isCurrentItemSelected,
-                    ) as React.JSX.Element)
-                  : (defaultContent as React.JSX.Element)}
-              </SelectItem>
-            );
-          })}
+          {items.map((value) => (
+            <SelectItem
+              key={value}
+              value={value}
+              className={cn(
+                'flex items-center gap-2 rounded-lg px-2 py-1.5 hover:cursor-pointer',
+                'scroll-m-1 outline-none transition-colors',
+                'hover:bg-black/[0.075] dark:hover:bg-white/10',
+                'data-[active-item]:bg-black/[0.075] dark:data-[active-item]:bg-white/10',
+                'w-full min-w-0 text-sm',
+                itemClassName,
+              )}
+            >
+              <SelectItemCheck className="text-primary" />
+              <span className="truncate">{value}</span>
+            </SelectItem>
+          ))}
         </SelectPopover>
       </SelectProvider>
     </div>
