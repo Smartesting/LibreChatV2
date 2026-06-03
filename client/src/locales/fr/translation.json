@@ -168,6 +168,7 @@
   "com_auth_error_login_rl": "Trop de tentatives de connexion en peu de temps. Veuillez réessayer plus tard.",
   "com_auth_error_login_server": "Une erreur interne du serveur s'est produite. Veuillez patienter quelques instants et réessayer.",
   "com_auth_error_login_unverified": "Votre compte n'a pas été vérifié. Veuillez vérifier que vous avez reçu un lien de vérification dans votre courriel.",
+  "com_auth_training_access_ended": "Votre accès à la formation est terminé, déconnexion en cours...",
   "com_auth_error_no_training": "Aucune formation en cours. Veuillez réessayer pendant vos heures de formation.",
   "com_auth_error_oauth_failed": "Échec de l'authentification. Veuillez vérifier votre méthode de connexion et réessayer.",
   "com_auth_facebook_login": "Se connecter avec Facebook",

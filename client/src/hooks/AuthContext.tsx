@@ -25,11 +25,14 @@ import {
   useLoginUserMutation,
   useLogoutUserMutation,
   useRefreshTokenMutation,
+  useUserSession,
 } from '~/data-provider';
 import { TAuthConfig, TAuthContext, TResError, TUserContext } from '~/common';
 import { getPostLoginRedirect, isSafeRedirect, SESSION_KEY } from '~/utils';
+import useLocalize from './useLocalize';
 import useTimeout from './useTimeout';
 import store from '~/store';
+import { NotificationSeverity, useToastContext } from '@librechat/client';
 
 const AuthContext = (import.meta.hot?.data?.__AuthContext ??
   createContext<TAuthContext | undefined>(undefined)) as React.Context<TAuthContext | undefined>;
@@ -51,6 +54,7 @@ const AuthContextProvider = ({
   const [error, setError] = useState<string | undefined>(undefined);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const setQueriesEnabled = useSetRecoilState<boolean>(store.queriesEnabled);
+  const { showToast } = useToastContext();
 
   const userRoleName = Array.isArray(user?.role) ? user.role[0] : (user?.role ?? '');
   const isCustomRole = isAuthenticated && !!user?.role && !isSystemRoleName(user.role);
@@ -73,7 +77,7 @@ const AuthContextProvider = ({
   });
 
   const navigate = useNavigate();
-
+  const localize = useLocalize();
   const setUserContext = useMemo(
     () =>
       debounce((userContext: TUserContext) => {
@@ -166,6 +170,30 @@ const AuthContextProvider = ({
   );
 
   const userQuery = useGetUserQuery({ enabled: !!(token ?? '') });
+
+  function showToastAndLogout(message) {
+    showToast({
+      message,
+      severity: NotificationSeverity.WARNING,
+      duration: 10000,
+    });
+    setTimeout(logout, 10000);
+  }
+
+  useUserSession({
+    enabled: !!(token ?? '') && isAuthenticated,
+    refetchInterval: 5 * 60 * 1000, // 5 minutes
+    onError: (error) => {
+      const resError = error as TResError;
+      if (resError?.response?.status === 403) {
+        if (resError.response.data?.message === 'no_ongoing_training') {
+          showToastAndLogout(localize('com_auth_training_access_ended'));
+        } else {
+          logout();
+        }
+      }
+    },
+  });
 
   const login = (data: t.TLoginUser) => {
     loginUser.mutate(data);

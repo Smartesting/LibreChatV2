@@ -1,8 +1,8 @@
 import { useRecoilValue } from 'recoil';
-import { QueryKeys, dataService } from 'librechat-data-provider';
-import { useQuery } from '@tanstack/react-query';
-import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
 import type t from 'librechat-data-provider';
+import { dataService, QueryKeys } from 'librechat-data-provider';
+import type { QueryObserverResult, UseQueryOptions } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import store from '~/store';
 
 export const useGetUserQuery = (
@@ -14,6 +14,19 @@ export const useGetUserQuery = (
     refetchOnReconnect: false,
     refetchOnMount: false,
     retry: false,
+    ...config,
+    enabled: (config?.enabled ?? true) === true && queriesEnabled,
+  });
+};
+
+export const useUserSession = (config?: UseQueryOptions<any>): QueryObserverResult<any> => {
+  const queriesEnabled = useRecoilValue<boolean>(store.queriesEnabled);
+  return useQuery<any>([QueryKeys.user, 'session'], () => dataService.getUserSession(), {
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
+    retry: false,
+    staleTime: 60 * 1000,
     ...config,
     enabled: (config?.enabled ?? true) === true && queriesEnabled,
   });
