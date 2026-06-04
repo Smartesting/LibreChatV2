@@ -9,18 +9,18 @@ import {
   useState,
 } from 'react';
 import { debounce } from 'lodash';
+import { useQueries } from '@tanstack/react-query';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { useNavigate } from 'react-router-dom';
 import type * as t from 'librechat-data-provider';
 import {
+  dataService,
   apiBaseUrl,
   buildLoginRedirectUrl,
-  isSystemRoleName,
+  QueryKeys,
   setTokenHeader,
-  SystemRoles,
 } from 'librechat-data-provider';
 import {
-  useGetRole,
   useGetUserQuery,
   useLoginUserMutation,
   useLogoutUserMutation,
@@ -56,25 +56,35 @@ const AuthContextProvider = ({
   const setQueriesEnabled = useSetRecoilState<boolean>(store.queriesEnabled);
   const { showToast } = useToastContext();
 
-  const userRoleName = Array.isArray(user?.role) ? user.role[0] : (user?.role ?? '');
-  const isCustomRole = isAuthenticated && !!user?.role && !isSystemRoleName(user.role);
+  const assignedRoles = useMemo(() => {
+    if (!isAuthenticated || user?.role === undefined) {
+      return [];
+    }
 
-  const { data: userRole = null } = useGetRole(SystemRoles.USER, {
-    enabled: !!(
-      isAuthenticated && (Array.isArray(user?.role) ? user.role.length > 0 : !!user?.role)
-    ),
+    return user.role;
+  }, [isAuthenticated, user?.role]);
+
+  const roleQueries = useQueries({
+    queries: assignedRoles.map((roleName) => ({
+      queryKey: [QueryKeys.roles, roleName],
+      queryFn: () => dataService.getRole(roleName),
+      enabled: isAuthenticated,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      refetchOnMount: false,
+      retry: false,
+    })),
   });
-  const { data: adminRole = null } = useGetRole(SystemRoles.ADMIN, {
-    enabled: !!(
-      isAuthenticated &&
-      (Array.isArray(user?.role)
-        ? user.role.includes(SystemRoles.ADMIN)
-        : user?.role === SystemRoles.ADMIN)
-    ),
-  });
-  const { data: customRole = null } = useGetRole(isCustomRole ? userRoleName : '_', {
-    enabled: isCustomRole,
-  });
+
+  const resolvedRoles = useMemo(() => {
+    const nextRoles: Record<string, t.TRole | null | undefined> = {};
+
+    for (let index = 0; index < assignedRoles.length; index++) {
+      nextRoles[assignedRoles[index]] = roleQueries[index]?.data;
+    }
+
+    return nextRoles;
+  }, [assignedRoles, roleQueries]);
 
   const navigate = useNavigate();
   const localize = useLocalize();
@@ -303,25 +313,11 @@ const AuthContextProvider = ({
       login,
       logout,
       setError,
-      roles: {
-        [SystemRoles.USER]: userRole,
-        [SystemRoles.ADMIN]: adminRole,
-        ...(isCustomRole && customRole ? { [userRoleName]: customRole } : {}),
-      },
+      roles: resolvedRoles,
       isAuthenticated,
     }),
 
-    [
-      user,
-      error,
-      isAuthenticated,
-      token,
-      userRole,
-      adminRole,
-      isCustomRole,
-      userRoleName,
-      customRole,
-    ],
+    [user, error, isAuthenticated, token, resolvedRoles],
   );
 
   return <AuthContext.Provider value={memoedValue}>{children}</AuthContext.Provider>;

@@ -8,28 +8,31 @@ import { useAuthContext } from './AuthContext';
 export function useRoleSelector(permissionType: PermissionTypes) {
   const { user, roles } = useAuthContext();
   const [selectedRole, setSelectedRole] = useState<string>(SystemRoles.USER);
+  const selectedRoleData = roles?.[selectedRole] ?? null;
 
   const { data: roleList } = useListRoles({
     enabled: hasRole(user?.role, SystemRoles.ADMIN),
   });
 
+  const shouldFetchSelectedRole = selectedRoleData == null;
   const isSelectedCustomRole = !isSystemRoleName(selectedRole);
 
   const {
-    data: customRoleData = null,
-    isLoading: isCustomRoleLoading,
-    isError: isCustomRoleError,
-  } = useGetRole(isSelectedCustomRole ? selectedRole : '_', { enabled: isSelectedCustomRole });
+    data: fetchedRoleData = null,
+    isLoading: isSelectedRoleLoading,
+    isError: isSelectedRoleError,
+  } = useGetRole(selectedRole, { enabled: shouldFetchSelectedRole });
 
   const resolvePermissions = useCallback(
-    (role: string, customData: TRole | null) => {
+    (role: string, roleData: TRole | null) => {
+      if (roleData?.permissions?.[permissionType]) {
+        return roleData.permissions[permissionType];
+      }
+      const contextPermissions = roles?.[role]?.permissions?.[permissionType];
+      if (contextPermissions) {
+        return contextPermissions;
+      }
       const isCustom = !isSystemRoleName(role);
-      if (isCustom && customData?.permissions?.[permissionType]) {
-        return customData.permissions[permissionType];
-      }
-      if (!isCustom && roles?.[role]?.permissions?.[permissionType]) {
-        return roles[role]?.permissions[permissionType];
-      }
       const defaults = !isCustom
         ? roleDefaults[role as SystemRoles]
         : roleDefaults[SystemRoles.USER];
@@ -39,8 +42,8 @@ export function useRoleSelector(permissionType: PermissionTypes) {
   );
 
   const defaultValues = useMemo(
-    () => resolvePermissions(selectedRole, customRoleData),
-    [resolvePermissions, selectedRole, customRoleData],
+    () => resolvePermissions(selectedRole, fetchedRoleData ?? selectedRoleData),
+    [resolvePermissions, selectedRole, fetchedRoleData, selectedRoleData],
   );
 
   const availableRoleNames = useMemo(() => {
@@ -57,8 +60,8 @@ export function useRoleSelector(permissionType: PermissionTypes) {
     selectedRole,
     setSelectedRole,
     isSelectedCustomRole,
-    isCustomRoleLoading,
-    isCustomRoleError,
+    isCustomRoleLoading: shouldFetchSelectedRole ? isSelectedRoleLoading : false,
+    isCustomRoleError: shouldFetchSelectedRole ? isSelectedRoleError : false,
     defaultValues,
     roleDropdownItems,
   };
