@@ -10,27 +10,12 @@ cache: true
 # Custom interface configuration
 interface:
   modelSelect: true
-  parameters: false
   presets: false
-  prompts:
-    use: true
-    create: true
-    share: false
-    public: false
-  bookmarks: false
+  bookmarks: true
   multiConvo: true
-  agents:
-    use: true
-    create: true
-    share: false
-    public: false
-  peoplePicker:
-    users: false
-    groups: false
-    roles: false
   marketplace:
     use: false
-  fileCitations: false
+  fileCitations: true
 
 # Definition of custom endpoints
 endpoints:
