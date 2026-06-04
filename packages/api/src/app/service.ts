@@ -7,6 +7,7 @@ import {
 } from '@librechat/data-schemas';
 import type { Types } from 'mongoose';
 import type { AppConfig, IConfig } from '@librechat/data-schemas';
+import { normalizeRoles, serializeRoles } from '~/utils';
 
 const BASE_CONFIG_KEY = '_BASE_';
 
@@ -42,14 +43,14 @@ export interface AppConfigServiceDeps {
   /** Resolve full principal list (user + role + groups) from userId/role. */
   getUserPrincipals: (params: {
     userId: string | Types.ObjectId;
-    role?: string | null;
+    role?: string | string[] | null;
   }) => Promise<Array<{ principalType: string; principalId?: string | Types.ObjectId }>>;
   /** TTL in ms for per-user/role merged config caches. Defaults to 60 000. */
   overrideCacheTtl?: number;
 }
 
 export interface GetAppConfigOptions {
-  role?: string;
+  role?: string | string[];
   userId?: string;
   tenantId?: string;
   refresh?: boolean;
@@ -72,19 +73,20 @@ export function _resetOverrideStrictCache(): void {
   _warnedNoTenantInStrictMode = false;
 }
 
-function overrideCacheKey(role?: string, userId?: string, tenantId?: string): string {
+function overrideCacheKey(role?: string | string[], userId?: string, tenantId?: string): string {
   // Fall back to the ALS tenant context before `__default__`: callers that rely on the
   // tenant middleware (the common path) pass no explicit tenantId, so without this the
   // entry is keyed under the shared `__default__` bucket and leaks across tenants.
   const tenant = tenantId || getTenantId() || '__default__';
-  if (userId && role) {
-    return `_OVERRIDE_:${tenant}:${role}:${userId}`;
+  const serializedRoles = serializeRoles(role);
+  if (userId && serializedRoles) {
+    return `_OVERRIDE_:${tenant}:${serializedRoles}:${userId}`;
   }
   if (userId) {
     return `_OVERRIDE_:${tenant}:${userId}`;
   }
-  if (role) {
-    return `_OVERRIDE_:${tenant}:${role}`;
+  if (serializedRoles) {
+    return `_OVERRIDE_:${tenant}:${serializedRoles}`;
   }
   return `_OVERRIDE_:${tenant}:${BASE_CONFIG_PRINCIPAL_ID}`;
 }
@@ -105,16 +107,16 @@ export function createAppConfigService(deps: AppConfigServiceDeps) {
   const cache = getCache(cacheKeys.APP_CONFIG);
 
   async function buildPrincipals(
-    role?: string,
+    role?: string | string[],
     userId?: string,
   ): Promise<Array<{ principalType: string; principalId?: string | Types.ObjectId }>> {
     if (userId) {
       return getUserPrincipals({ userId, role });
     }
     const principals: Array<{ principalType: string; principalId?: string | Types.ObjectId }> = [];
-    if (role) {
-      principals.push({ principalType: PrincipalType.ROLE, principalId: role });
-    }
+    normalizeRoles(role).forEach((roleName) =>
+      principals.push({ principalType: PrincipalType.ROLE, principalId: roleName }),
+    );
     return principals;
   }
 

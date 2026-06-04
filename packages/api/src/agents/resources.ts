@@ -26,7 +26,7 @@ export type TGetFiles = (
 export type TFilterFilesByAgentAccess = (params: {
   files: Array<TFile>;
   userId: string;
-  role?: string;
+  role?: string | string[];
   agentId: string;
 }) => Promise<Array<TFile>>;
 

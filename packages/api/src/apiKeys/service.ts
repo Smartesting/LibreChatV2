@@ -79,7 +79,7 @@ export function createApiKeyServiceDependencies(
 export interface GetRemoteAgentPermissionsDeps {
   getEffectivePermissions: (params: {
     userId: string;
-    role?: string;
+    role?: string | string[];
     resourceType: ResourceType;
     resourceId: string | Types.ObjectId;
   }) => Promise<number>;
@@ -89,7 +89,7 @@ export interface GetRemoteAgentPermissionsDeps {
 export async function getRemoteAgentPermissions(
   deps: GetRemoteAgentPermissionsDeps,
   userId: string,
-  role: string | undefined,
+  role: string | string[] | undefined,
   resourceId: string | Types.ObjectId,
 ): Promise<number> {
   const agentPerms = await deps.getEffectivePermissions({
@@ -113,14 +113,14 @@ export async function getRemoteAgentPermissions(
 
 export async function checkRemoteAgentAccess(params: {
   userId: string;
-  role?: string;
+  role?: string | string[];
   agentId: string;
   getAgent: (query: {
     id: string;
   }) => Promise<{ _id: Types.ObjectId; [key: string]: unknown } | null>;
   getEffectivePermissions: (params: {
     userId: string;
-    role?: string;
+    role?: string | string[];
     resourceType: ResourceType;
     resourceId: string | Types.ObjectId;
   }) => Promise<number>;

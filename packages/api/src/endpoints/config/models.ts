@@ -23,7 +23,7 @@ interface ResolvedEndpoint {
 
 export interface LoadConfigModelsDeps {
   getAppConfig: (params: {
-    role?: string;
+    role?: string | string[];
     userId?: string;
     tenantId?: string;
   }) => Promise<AppConfig>;

@@ -16,7 +16,7 @@ type MutableEndpointsConfig = Record<string, PartialEndpointEntry | false | null
 
 export interface EndpointsConfigDeps {
   getAppConfig: (params: {
-    role?: string;
+    role?: string | string[];
     userId?: string;
     tenantId?: string;
   }) => Promise<AppConfig>;

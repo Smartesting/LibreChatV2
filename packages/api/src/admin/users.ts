@@ -12,6 +12,7 @@ import type { FilterQuery } from 'mongoose';
 import type { Response } from 'express';
 import type { ServerRequest } from '~/types/http';
 import { parsePagination } from './pagination';
+import { normalizeRoles } from '~/utils';
 
 const MAX_SEARCH_LENGTH = 200;
 
@@ -59,7 +60,7 @@ export function createAdminUsersHandlers(deps: AdminUsersDeps) {
         username: u.username ?? '',
         email: u.email ?? '',
         avatar: u.avatar ?? '',
-        role: u.role ?? 'USER',
+        role: normalizeRoles(u.role ?? SystemRoles.USER),
         provider: u.provider ?? 'local',
         createdAt: u.createdAt?.toISOString(),
         updatedAt: u.updatedAt?.toISOString(),

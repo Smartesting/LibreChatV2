@@ -31,7 +31,7 @@ export type OnAgentInitializedCallback = (
  */
 export type CheckAgentPermission = (params: {
   userId: string;
-  role?: string;
+  role?: string | string[];
   resourceType: string;
   resourceId: unknown;
   requiredPermission: number;

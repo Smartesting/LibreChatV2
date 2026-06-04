@@ -4,6 +4,7 @@ import type { Types } from 'mongoose';
 import { logger } from '@librechat/data-schemas';
 import { SystemRoles, ResourceType, PermissionBits } from 'librechat-data-provider';
 import type { ServerRequest } from '~/types';
+import { hasRole } from '~/utils';
 
 export type AgentUploadAuthResult =
   | { allowed: true }
@@ -11,7 +12,7 @@ export type AgentUploadAuthResult =
 
 export interface AgentUploadAuthParams {
   userId: string;
-  userRole: string;
+  userRole: string | string[];
   agentId?: string;
   toolResource?: string | null;
   messageFile?: boolean | string;
@@ -24,7 +25,7 @@ export interface AgentUploadAuthDeps {
   } | null>;
   checkPermission: (params: {
     userId: string;
-    role: string;
+    role: string | string[];
     resourceType: ResourceType;
     resourceId: string | Types.ObjectId;
     requiredPermission: number;
@@ -43,7 +44,7 @@ export async function checkAgentUploadAuth(
     return { allowed: true };
   }
 
-  if (userRole === SystemRoles.ADMIN) {
+  if (hasRole(userRole, SystemRoles.ADMIN)) {
     return { allowed: true };
   }
 
@@ -97,7 +98,7 @@ export async function verifyAgentUploadPermission({
   const result = await checkAgentUploadAuth(
     {
       userId: user.id,
-      userRole: user.role ?? '',
+      userRole: user.role ?? [],
       agentId: metadata.agent_id,
       toolResource: metadata.tool_resource,
       messageFile: metadata.message_file,

@@ -73,7 +73,7 @@ export interface SkillsHandlersDeps {
   /** Access-control primitives from PermissionService. */
   findAccessibleResources: (params: {
     userId: string;
-    role?: string | null;
+    role?: string | string[] | null;
     resourceType: string;
     requiredPermissions: number;
   }) => Promise<Types.ObjectId[]>;

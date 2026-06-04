@@ -122,7 +122,7 @@ export class AccessControlService {
     requiredPermissions,
   }: {
     userId: string | Types.ObjectId;
-    role?: string;
+    role?: string | string[];
     resourceType: string;
     requiredPermissions: number;
   }): Promise<Types.ObjectId[]> {
@@ -150,7 +150,7 @@ export class AccessControlService {
     role,
   }: {
     userId: string | Types.ObjectId;
-    role?: string;
+    role?: string | string[];
   }): Promise<ResolvedPrincipal[]> {
     return await this._dbMethods.getUserPrincipals({ userId, role });
   }
@@ -246,7 +246,7 @@ export class AccessControlService {
     resourceIds,
   }: {
     userId: string | Types.ObjectId;
-    role: string;
+    role: string | string[];
     resourceType: ResourceType;
     resourceIds: (string | Types.ObjectId)[];
   }): Promise<Map<string, number>> {
@@ -338,7 +338,7 @@ export class AccessControlService {
     requiredPermission,
   }: {
     userId: string;
-    role?: string;
+    role?: string | string[];
     resourceType: ResourceType;
     resourceId: string | Types.ObjectId;
     requiredPermission: number;

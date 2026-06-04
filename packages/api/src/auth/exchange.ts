@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { Keyv } from 'keyv';
 import { logger } from '@librechat/data-schemas';
 import type { IUser } from '@librechat/data-schemas';
+import { normalizeRoles } from '~/utils';
 
 /** Default admin panel URL for local development */
 const DEFAULT_ADMIN_PANEL_URL = 'http://localhost:3000';
@@ -23,7 +24,7 @@ export interface AdminExchangeUser {
   email: string;
   name: string;
   username: string;
-  role: string;
+  role: string[];
   avatar?: string;
   provider?: string;
   openidId?: string;
@@ -68,7 +69,7 @@ export function serializeUserForExchange(user: IUser): AdminExchangeUser {
     email: user.email,
     name: user.name ?? '',
     username: user.username ?? '',
-    role: user.role ?? 'USER',
+    role: normalizeRoles(user.role ?? 'USER'),
     avatar: user.avatar,
     provider: user.provider,
     openidId: user.openidId,

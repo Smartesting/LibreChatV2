@@ -11,10 +11,11 @@ import type { NextFunction, Response } from 'express';
 import type { Types, ClientSession } from 'mongoose';
 import type { ResolvedPrincipal } from '~/types/principal';
 import type { ServerRequest } from '~/types/http';
+import { serializeRoles } from '~/utils';
 
 interface CapabilityDeps {
   getUserPrincipals: (
-    params: { userId: string | Types.ObjectId; role?: string | null },
+    params: { userId: string | Types.ObjectId; role?: string | string[] | null },
     session?: ClientSession,
   ) => Promise<ResolvedPrincipal[]>;
   hasCapabilityForPrincipals: (params: {
@@ -26,7 +27,7 @@ interface CapabilityDeps {
 
 export interface CapabilityUser {
   id: string;
-  role: string;
+  role: string | string[];
   tenantId?: string;
 }
 
@@ -107,7 +108,7 @@ export function getCachedPrincipals(user: CapabilityUser): ResolvedPrincipal[] |
   if (!store) {
     return undefined;
   }
-  const key = `${user.id}:${user.role}:${user.tenantId ?? ''}`;
+  const key = `${user.id}:${serializeRoles(user.role)}:${user.tenantId ?? ''}`;
   return store.principals.get(key);
 }
 
@@ -146,7 +147,7 @@ export function generateCapabilityCheck(deps: CapabilityDeps): {
       return cached;
     }
 
-    const principalKey = `${user.id}:${user.role}:${user.tenantId ?? ''}`;
+    const principalKey = `${user.id}:${serializeRoles(user.role)}:${user.tenantId ?? ''}`;
     let principals: ResolvedPrincipal[];
     const cachedPrincipals = store?.principals.get(principalKey);
     if (cachedPrincipals) {
@@ -204,7 +205,7 @@ export function generateCapabilityCheck(deps: CapabilityDeps): {
 
         const user: CapabilityUser = {
           id,
-          role: req.user.role ?? '',
+          role: req.user.role ?? [],
           tenantId: (req.user as CapabilityUser).tenantId,
         };
 

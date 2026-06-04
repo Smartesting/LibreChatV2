@@ -118,7 +118,7 @@ export type AdminUserListItem = {
   username: string;
   email: string;
   avatar: string;
-  role: string;
+  role: string[];
   provider: string;
   createdAt?: string;
   updatedAt?: string;

@@ -13,7 +13,7 @@ import { getBalanceConfig } from '~/app/config';
 
 export interface BalanceMiddlewareOptions {
   getAppConfig: (options?: {
-    role?: string;
+    role?: string | string[];
     userId?: string;
     tenantId?: string;
     refresh?: boolean;

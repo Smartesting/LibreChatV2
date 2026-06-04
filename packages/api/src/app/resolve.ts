@@ -3,11 +3,11 @@ import type { AppConfig } from '@librechat/data-schemas';
 
 interface UserForConfigResolution {
   tenantId?: string;
-  role?: string;
+  role?: string | string[];
 }
 
 type GetAppConfig = (opts: {
-  role?: string;
+  role?: string | string[];
   tenantId?: string;
   baseOnly?: boolean;
 }) => Promise<AppConfig>;

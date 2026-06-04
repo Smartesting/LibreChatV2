@@ -25,6 +25,7 @@ export * from './yaml';
 export * from './http';
 export * from './tokens';
 export * from './tokenMap';
+export * from './roles';
 export * from './url';
 export * from './message';
 export * from './tracing';

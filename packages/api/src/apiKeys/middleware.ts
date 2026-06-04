@@ -19,7 +19,7 @@ export interface RemoteAgentAccessDependencies {
   }) => Promise<{ _id: Types.ObjectId; [key: string]: unknown } | null>;
   getEffectivePermissions: (params: {
     userId: string;
-    role?: string;
+    role?: string | string[];
     resourceType: ResourceType;
     resourceId: string | Types.ObjectId;
   }) => Promise<number>;

@@ -4,6 +4,7 @@ import type { NextFunction, Response } from 'express';
 import type { IRole } from '@librechat/data-schemas';
 import type { CapabilityUser, HasCapabilityFn } from './capabilities';
 import type { RequestBody, ServerRequest } from '~/types/http';
+import { normalizeRoles, serializeRoles } from '~/utils';
 
 type ShareResourcePermissions = Partial<Record<Permissions, boolean>>;
 
@@ -56,8 +57,8 @@ function formatError(error: unknown): string {
 
 function getShareContext(req: ShareRequest, res: Response, action: string): ShareContext | null {
   const { user } = req;
-  const role = user?.role;
-  if (!user || !role) {
+  const role = normalizeRoles(user?.role);
+  if (!user || role.length === 0) {
     res.status(401).json({
       error: 'Unauthorized',
       message: 'Authentication required',
@@ -106,7 +107,7 @@ export function createSharePolicyMiddleware({ getRoleByName, hasCapability }: Sh
     }
 
     const { user, resourceType, permissionType } = resolvedContext;
-    const cacheKey = `${user.role}:${resourceType}`;
+    const cacheKey = `${serializeRoles(user.role)}:${resourceType}`;
     const cached = req.sharePermissionContext;
     if (cached?.cacheKey === cacheKey) {
       return {
@@ -116,8 +117,11 @@ export function createSharePolicyMiddleware({ getRoleByName, hasCapability }: Sh
       };
     }
 
-    const role = await getRoleByName(user.role);
-    if (!role?.permissions) {
+    const roles = (
+      await Promise.all(normalizeRoles(user.role).map((roleName) => getRoleByName(roleName)))
+    ).filter((role): role is IRole => role?.permissions != null);
+
+    if (roles.length === 0) {
       res.status(403).json({
         error: 'Forbidden',
         message: 'No permissions configured for user role',
@@ -125,7 +129,15 @@ export function createSharePolicyMiddleware({ getRoleByName, hasCapability }: Sh
       return null;
     }
 
-    const resourcePerms = role.permissions[permissionType] ?? {};
+    const resourcePerms = roles.reduce<ShareResourcePermissions>((acc, role) => {
+      const permissions = role.permissions?.[permissionType] ?? {};
+      for (const [permission, enabled] of Object.entries(permissions)) {
+        if (enabled) {
+          acc[permission as Permissions] = true;
+        }
+      }
+      return acc;
+    }, {});
     req.sharePermissionContext = {
       cacheKey,
       resourcePerms,

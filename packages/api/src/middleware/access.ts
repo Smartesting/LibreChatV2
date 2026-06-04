@@ -1,13 +1,14 @@
+import type { IRole, IUser } from '@librechat/data-schemas';
 import { logger } from '@librechat/data-schemas';
 import {
-  Permissions,
-  EndpointURLs,
   EModelEndpoint,
-  PermissionTypes,
+  EndpointURLs,
   isAgentsEndpoint,
+  Permissions,
+  PermissionTypes,
 } from 'librechat-data-provider';
 import type { NextFunction, Request as ServerRequest, Response as ServerResponse } from 'express';
-import type { IRole, IUser } from '@librechat/data-schemas';
+import { normalizeRoles, serializeRoles } from '~/utils';
 
 export function skipAgentCheck(req?: ServerRequest): boolean {
   if (!req || !req?.body?.endpoint) {
@@ -69,7 +70,12 @@ function getRequestPermissionCacheKey({
   permissionType,
   permissions,
 }: CheckAccessWithRequestCacheParams): string {
-  return [permissionType, [...permissions].sort().join(','), user.id, user.role].join(':');
+  return [
+    permissionType,
+    [...permissions].sort().join(','),
+    user.id,
+    serializeRoles(user.role),
+  ].join(':');
 }
 
 /**
@@ -96,15 +102,26 @@ export const checkAccess = async ({
     return true;
   }
 
-  if (!user || !user.role) {
+  const roleNames = normalizeRoles(user?.role);
+  if (!user || roleNames.length === 0) {
     return false;
   }
 
-  const role = await getRoleByName(user.role);
-  const permissionValue = role?.permissions?.[permissionType as keyof typeof role.permissions];
-  if (role && role.permissions && permissionValue) {
-    const hasAnyPermission = permissions.every((permission) => {
-      if (permissionValue[permission as keyof typeof permissionValue]) {
+  const roles = (await Promise.all(roleNames.map((roleName) => getRoleByName(roleName)))).filter(
+    (role): role is IRole => role != null,
+  );
+  const permissionValues = roles.map(
+    (role) => role.permissions?.[permissionType as keyof typeof role.permissions],
+  );
+
+  if (permissionValues.length > 0) {
+    return permissions.every((permission) => {
+      if (
+        permissionValues.some(
+          (permissionValue) =>
+            permissionValue && permissionValue[permission as keyof typeof permissionValue],
+        )
+      ) {
         return true;
       }
 
@@ -116,8 +133,6 @@ export const checkAccess = async ({
 
       return false;
     });
-
-    return hasAnyPermission;
   }
 
   return false;

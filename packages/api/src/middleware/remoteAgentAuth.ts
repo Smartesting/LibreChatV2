@@ -11,7 +11,7 @@ import type { TAgentsEndpoint } from 'librechat-data-provider';
 import type { RequestInit } from 'undici';
 import type { GetAppConfigOptions } from '../app/service';
 import { findOpenIDUser, getOpenIdEmail, normalizeOpenIdIssuer } from '../auth/openid';
-import { isEnabled, math } from '~/utils';
+import { isEnabled, math, serializeRoles } from '~/utils';
 
 export interface RemoteAgentAuthDeps {
   apiKeyMiddleware: RequestHandler;
@@ -256,7 +256,7 @@ function isResolvedUserConfigScope(initialOptions: GetAppConfigOptions, user: IU
   return (
     initialOptions.tenantId === userOptions.tenantId &&
     initialOptions.userId === userOptions.userId &&
-    initialOptions.role === userOptions.role &&
+    serializeRoles(initialOptions.role) === serializeRoles(userOptions.role) &&
     initialOptions.baseOnly === userOptions.baseOnly
   );
 }
@@ -433,8 +433,8 @@ async function resolveUser(
   }
 
   if (!user.role) {
-    user.role = SystemRoles.USER;
-    updateData.role = SystemRoles.USER;
+    user.role = [SystemRoles.USER];
+    updateData.role = user.role;
   }
 
   user.federatedTokens = {
