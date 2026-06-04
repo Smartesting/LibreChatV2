@@ -2,6 +2,7 @@ import { useMemo, useState, useCallback } from 'react';
 import { SystemRoles, roleDefaults, isSystemRoleName } from 'librechat-data-provider';
 import type { PermissionTypes, TRole } from 'librechat-data-provider';
 import { useGetRole, useListRoles } from '~/data-provider';
+import { hasRole } from '~/utils/roles';
 import { useAuthContext } from './AuthContext';
 
 export function useRoleSelector(permissionType: PermissionTypes) {
@@ -9,7 +10,7 @@ export function useRoleSelector(permissionType: PermissionTypes) {
   const [selectedRole, setSelectedRole] = useState<string>(SystemRoles.USER);
 
   const { data: roleList } = useListRoles({
-    enabled: user?.role === SystemRoles.ADMIN,
+    enabled: hasRole(user?.role, SystemRoles.ADMIN),
   });
 
   const isSelectedCustomRole = !isSystemRoleName(selectedRole);

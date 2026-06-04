@@ -16,6 +16,7 @@ import {
 import type { Control, UseFormSetValue, UseFormGetValues } from 'react-hook-form';
 import { useUpdatePeoplePickerPermissionsMutation } from '~/data-provider';
 import { useLocalize, useAuthContext, useRoleSelector } from '~/hooks';
+import { hasRole } from '~/utils';
 
 type FormValues = {
   [Permissions.VIEW_USERS]: boolean;
@@ -109,7 +110,7 @@ const PeoplePickerAdminSettings = () => {
     reset(defaultValues as FormValues);
   }, [isSelectedCustomRole, isCustomRoleLoading, isCustomRoleError, defaultValues, reset]);
 
-  if (user?.role !== SystemRoles.ADMIN) {
+  if (!hasRole(user?.role, SystemRoles.ADMIN)) {
     return null;
   }
 

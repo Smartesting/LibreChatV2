@@ -22,7 +22,7 @@ import {
   useGetExpandedAgentByIdQuery,
   useUploadAgentAvatarMutation,
 } from '~/data-provider';
-import { createProviderOption, getDefaultAgentFormValues } from '~/utils';
+import { createProviderOption, getDefaultAgentFormValues, hasRole } from '~/utils';
 import { useResourcePermissions } from '~/hooks/useResourcePermissions';
 import { useSelectAgent, useLocalize, useAuthContext } from '~/hooks';
 import { useAgentPanelContext } from '~/Providers/AgentPanelContext';
@@ -475,7 +475,7 @@ export default function AgentPanel() {
       return true;
     }
 
-    if (user?.role === SystemRoles.ADMIN) {
+    if (hasRole(user?.role, SystemRoles.ADMIN)) {
       return true;
     }
 

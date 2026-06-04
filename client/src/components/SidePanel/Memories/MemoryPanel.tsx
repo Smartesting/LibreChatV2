@@ -18,6 +18,7 @@ import {
   useGetUserQuery,
 } from '~/data-provider';
 import { useLocalize, useAuthContext, useHasAccess } from '~/hooks';
+import { hasRole } from '~/utils/roles';
 import MemoryCreateDialog from './MemoryCreateDialog';
 import MemoryUsageBadge from './MemoryUsageBadge';
 import AdminSettings from './AdminSettings';
@@ -28,6 +29,7 @@ const pageSize = 10;
 export default function MemoryPanel() {
   const localize = useLocalize();
   const { user } = useAuthContext();
+  const isAdmin = hasRole(user?.role, SystemRoles.ADMIN);
   const { data: userData } = useGetUserQuery();
   const { data: memData, isLoading } = useMemoriesQuery();
   const { showToast } = useToastContext();
@@ -198,10 +200,10 @@ export default function MemoryPanel() {
         />
 
         {/* Footer: Admin Settings + Pagination */}
-        {(user?.role === SystemRoles.ADMIN || filteredMemories.length > pageSize) && (
+        {(isAdmin || filteredMemories.length > pageSize) && (
           <div className="flex items-center justify-between gap-2">
             {/* Admin Settings - Left */}
-            {user?.role === SystemRoles.ADMIN ? <AdminSettings /> : <div />}
+            {isAdmin ? <AdminSettings /> : <div />}
 
             {/* Pagination - Right */}
             {filteredMemories.length > pageSize && (

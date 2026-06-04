@@ -1,8 +1,8 @@
-import { Navigate, useNavigate, useParams, useLocation, useSearchParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Spinner } from '@librechat/client';
-import { PermissionTypes, Permissions } from 'librechat-data-provider';
+import { Permissions, PermissionTypes } from 'librechat-data-provider';
 import { useGetSkillByIdQuery } from '~/data-provider';
-import { useHasAccess, useAuthContext, useLocalize } from '~/hooks';
+import { useAuthContext, useHasAccess, useLocalize } from '~/hooks';
 import SkillFileViewer from '~/components/Skills/display/SkillFileViewer';
 import SkillDetail from '~/components/Skills/display/SkillDetail';
 import SkillState from '~/components/Skills/display/SkillState';
@@ -34,7 +34,7 @@ export default function SkillsView() {
   const isCreate = location.pathname.endsWith('/new');
   const isEdit = location.pathname.endsWith('/edit');
 
-  const rolesLoaded = user?.role != null && roles?.[user.role] != null;
+  const rolesLoaded = user?.role != null && user.role.every((role) => roles?.[role] != null);
   if (!rolesLoaded) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-presentation">

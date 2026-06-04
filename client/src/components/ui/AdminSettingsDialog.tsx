@@ -16,6 +16,7 @@ import {
 } from '@librechat/client';
 import type { TranslationKeys } from '~/hooks/useLocalize';
 import { useAuthContext, useLocalize, useRoleSelector } from '~/hooks';
+import { hasRole } from '~/utils/roles';
 
 type FormValues = Record<Permissions, boolean>;
 
@@ -141,7 +142,7 @@ const AdminSettingsDialog: React.FC<AdminSettingsDialogProps> = ({
     reset(defaultValues);
   }, [isSelectedCustomRole, isCustomRoleLoading, isCustomRoleError, defaultValues, reset]);
 
-  if (user?.role !== SystemRoles.ADMIN) {
+  if (!hasRole(user?.role, SystemRoles.ADMIN)) {
     return null;
   }
 

@@ -11,6 +11,7 @@ import {
 import type { TPromptGroup } from 'librechat-data-provider';
 import { useAuthContext, useHasAccess, useLocalize, useResourcePermissions } from '~/hooks';
 import { GenericGrantAccessDialog } from '~/components/Sharing';
+import { hasRole } from '~/utils/roles';
 
 const SharePrompt = React.memo(
   ({ group, disabled }: { group?: TPromptGroup; disabled: boolean }) => {
@@ -37,9 +38,10 @@ const SharePrompt = React.memo(
     }
 
     const canShareThisPrompt = hasPermission(PermissionBits.SHARE);
+    const isAdmin = hasRole(user?.role, SystemRoles.ADMIN);
 
     const shouldShowShareButton =
-      (group.author === user?.id || user?.role === SystemRoles.ADMIN || canShareThisPrompt) &&
+      (group.author === user?.id || isAdmin || canShareThisPrompt) &&
       hasAccessToSharePrompts &&
       !permissionsLoading;
 

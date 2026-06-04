@@ -12,6 +12,7 @@ import type { AgentForm, AgentPanelProps } from '~/common';
 import { useLocalize, useAuthContext, useHasAccess, useResourcePermissions } from '~/hooks';
 import { GenericGrantAccessDialog } from '~/components/Sharing';
 import { useUpdateAgentMutation } from '~/data-provider';
+import { hasRole } from '~/utils/roles';
 import AdvancedButton from './Advanced/AdvancedButton';
 import VersionButton from './Version/VersionButton';
 import DuplicateAgent from './DuplicateAgent';
@@ -61,6 +62,7 @@ export default function AgentFooter({
   const canDeleteThisAgent = hasPermission(PermissionBits.DELETE);
   const canShareRemoteAgent = hasRemoteAgentPermission(PermissionBits.SHARE);
   const isSaving = createMutation.isLoading || updateMutation.isLoading || isAvatarUploading;
+  const isAdmin = hasRole(user?.role, SystemRoles.ADMIN);
   const renderSaveButton = () => {
     if (isSaving) {
       return <Spinner className="icon-md" aria-hidden="true" />;
@@ -79,18 +81,17 @@ export default function AgentFooter({
     <div className="mb-1 flex w-full flex-col gap-2">
       {showButtons && <AdvancedButton setActivePanel={setActivePanel} />}
       {showButtons && agent_id && <VersionButton setActivePanel={setActivePanel} />}
-      {user?.role === SystemRoles.ADMIN && showButtons && <AdminSettings />}
+      {isAdmin && showButtons && <AdminSettings />}
       {/* Context Button */}
       <div className="flex items-center justify-end gap-2">
-        {(agent?.author === user?.id || user?.role === SystemRoles.ADMIN || canDeleteThisAgent) &&
-          !permissionsLoading && (
-            <DeleteButton
-              agent_id={agent_id}
-              setCurrentAgentId={setCurrentAgentId}
-              createMutation={createMutation}
-            />
-          )}
-        {(agent?.author === user?.id || user?.role === SystemRoles.ADMIN || canShareThisAgent) &&
+        {(agent?.author === user?.id || isAdmin || canDeleteThisAgent) && !permissionsLoading && (
+          <DeleteButton
+            agent_id={agent_id}
+            setCurrentAgentId={setCurrentAgentId}
+            createMutation={createMutation}
+          />
+        )}
+        {(agent?.author === user?.id || isAdmin || canShareThisAgent) &&
           hasAccessToShareAgents &&
           !permissionsLoading && (
             <GenericGrantAccessDialog
@@ -100,7 +101,7 @@ export default function AgentFooter({
               resourceType={ResourceType.AGENT}
             />
           )}
-        {(agent?.author === user?.id || user?.role === SystemRoles.ADMIN || canShareRemoteAgent) &&
+        {(agent?.author === user?.id || isAdmin || canShareRemoteAgent) &&
           hasAccessToShareRemoteAgents &&
           !remotePermissionsLoading &&
           agent?._id && (
@@ -119,8 +120,9 @@ export default function AgentFooter({
               </button>
             </GenericGrantAccessDialog>
           )}
-        {(agent?.author === user?.id || user?.role === SystemRoles.ADMIN || canEditThisAgent) &&
-          !permissionsLoading && <DuplicateAgent agent_id={agent_id} />}
+        {(agent?.author === user?.id || isAdmin || canEditThisAgent) && !permissionsLoading && (
+          <DuplicateAgent agent_id={agent_id} />
+        )}
         {/* Submit Button */}
         <button
           className="btn btn-primary focus:shadow-outline flex h-9 w-full items-center justify-center px-4 py-2 font-semibold text-white hover:bg-green-600 focus:border-green-500"

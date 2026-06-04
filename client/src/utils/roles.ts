@@ -1,4 +1,4 @@
-import type { AccessRoleIds } from 'librechat-data-provider';
+import type { AccessRoleIds, SystemRoles } from 'librechat-data-provider';
 import type { TranslationKeys } from '~/hooks/useLocalize';
 
 /**
@@ -87,4 +87,12 @@ export const getRoleLocalizationKeys = (
   description: TranslationKeys;
 } => {
   return ROLE_LOCALIZATIONS[roleId] || { name: 'com_ui_unknown', description: 'com_ui_unknown' };
+};
+
+export const hasRole = (
+  assignedRoles: ReadonlyArray<SystemRoles> | undefined,
+  role: SystemRoles,
+): boolean => {
+  if (!assignedRoles) return false;
+  return assignedRoles.includes(role);
 };

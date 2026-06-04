@@ -23,6 +23,7 @@ import {
 } from 'librechat-data-provider';
 import { useAuthContext, useHasAccess, useResourcePermissions, MCPServerDefinition } from '~/hooks';
 import { GenericGrantAccessDialog } from '~/components/Sharing';
+import { hasRole } from '~/utils/roles';
 import { useMCPServerForm } from './hooks/useMCPServerForm';
 import { useLocalize, useCopyToClipboard } from '~/hooks';
 import MCPServerForm from './MCPServerForm';
@@ -95,12 +96,10 @@ export default function MCPServerDialog({
   );
 
   const canShareThisServer = hasPermission(PermissionBits.SHARE);
+  const isAdmin = hasRole(user?.role, SystemRoles.ADMIN);
 
   const shouldShowShareButton =
-    server &&
-    (user?.role === SystemRoles.ADMIN || canShareThisServer) &&
-    hasAccessToShareMcpServers &&
-    !permissionsLoading;
+    server && (isAdmin || canShareThisServer) && hasAccessToShareMcpServers && !permissionsLoading;
 
   const redirectUri = createdServerId
     ? `${window.location.origin}/api/mcp/${createdServerId}/oauth/callback`

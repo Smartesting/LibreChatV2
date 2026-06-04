@@ -3,7 +3,7 @@ import { FilterInput } from '@librechat/client';
 import { SystemRoles, PermissionTypes, Permissions } from 'librechat-data-provider';
 import { AdminSettings, CreateSkillMenu } from '~/components/Skills/buttons';
 import { useHasAccess, useAuthContext, useLocalize } from '~/hooks';
-import { cn } from '~/utils';
+import { cn, hasRole } from '~/utils';
 
 export default function FilterSkills({
   searchTerm,
@@ -33,7 +33,7 @@ export default function FilterSkills({
         />
         {hasCreateAccess && <CreateSkillMenu />}
       </div>
-      {user?.role === SystemRoles.ADMIN && (
+      {hasRole(user?.role, SystemRoles.ADMIN) && (
         <div className="flex w-full items-center justify-end">
           <AdminSettings />
         </div>

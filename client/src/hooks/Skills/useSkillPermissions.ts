@@ -3,6 +3,7 @@ import { ResourceType, PermissionBits, SystemRoles } from 'librechat-data-provid
 import type { TSkill, TSkillSummary } from 'librechat-data-provider';
 import useResourcePermissions from '~/hooks/useResourcePermissions';
 import { useAuthContext } from '~/hooks/AuthContext';
+import { hasRole } from '~/utils/roles';
 
 export interface SkillPermissions {
   /** Permission query is still resolving */
@@ -34,7 +35,7 @@ export default function useSkillPermissions(
 
   return useMemo<SkillPermissions>(() => {
     const isOwner = skill != null && skill.author === user?.id;
-    const isAdmin = user?.role === SystemRoles.ADMIN;
+    const isAdmin = hasRole(user?.role, SystemRoles.ADMIN);
     const privileged = isOwner || isAdmin;
 
     return {
