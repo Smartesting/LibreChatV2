@@ -10,7 +10,8 @@ cache: true
 # Custom interface configuration
 interface:
   modelSelect: true
-  presets: false
+  parameters: true
+  presets: true
   bookmarks: true
   multiConvo: true
   marketplace:
