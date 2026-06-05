@@ -26,7 +26,7 @@ type TrainingFormValues = Omit<TrainingCreateParams, 'startDateTime' | 'endDateT
 };
 
 const defaultTrainingFormValues: TrainingFormValues = {
-  name: 'Accelerate your Testing Processes with GenAI',
+  name: 'ISTQB CT-GenAI',
   description: '',
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Default to browser timezone
   startDateTime: undefined,
