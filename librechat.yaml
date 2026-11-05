@@ -9,7 +9,7 @@ cache: true
 
 # Custom interface configuration
 interface:
-  modelSelect: false
+  modelSelect: true
   parameters: true
   presets: true
   bookmarks: true
@@ -61,12 +61,14 @@ endpoints:
 
 # Display names for the models served through OpenRouter
 modelSpecs:
-  enforce: true
   prioritize: true
+  addedEndpoints:
+    - agents
   list:
     # OpenAI
     - name: "openrouter-gpt-6-1-sol"
       label: "GPT-6.1 Sol"
+      iconURL: "/assets/openai-color.svg"
       group: "OpenAI"
       groupIcon: "openAI"
       preset:
@@ -75,6 +77,7 @@ modelSpecs:
         modelLabel: "GPT-6.1 Sol"
     - name: "openrouter-gpt-6-1-terra"
       label: "GPT-6.1 Terra"
+      iconURL: "/assets/openai-color.svg"
       group: "OpenAI"
       preset:
         endpoint: "OpenRouter"
@@ -82,6 +85,7 @@ modelSpecs:
         modelLabel: "GPT-6.1 Terra"
     - name: "openrouter-gpt-5-6-luna"
       label: "GPT-5.6 Luna"
+      iconURL: "/assets/openai-color.svg"
       group: "OpenAI"
       preset:
         endpoint: "OpenRouter"
@@ -91,6 +95,7 @@ modelSpecs:
     # Anthropic
     - name: "openrouter-claude-sonnet-5-5"
       label: "Claude Sonnet 5.5"
+      iconURL: "/assets/anthropic.svg"
       group: "Anthropic"
       groupIcon: "anthropic"
       preset:
@@ -99,6 +104,7 @@ modelSpecs:
         modelLabel: "Claude Sonnet 5.5"
     - name: "openrouter-claude-haiku-5-5"
       label: "Claude Haiku 5.5"
+      iconURL: "/assets/anthropic.svg"
       group: "Anthropic"
       preset:
         endpoint: "OpenRouter"
@@ -108,6 +114,7 @@ modelSpecs:
     # Google
     - name: "openrouter-gemini-3-8-flash"
       label: "Gemini 3.8 Flash"
+      iconURL: "/assets/google.svg"
       group: "Google"
       groupIcon: "google"
       preset:
@@ -116,6 +123,7 @@ modelSpecs:
         modelLabel: "Gemini 3.8 Flash"
     - name: "openrouter-gemini-3-5-flash-lite"
       label: "Gemini 3.5 Flash Lite"
+      iconURL: "/assets/google.svg"
       group: "Google"
       preset:
         endpoint: "OpenRouter"
@@ -125,6 +133,7 @@ modelSpecs:
     # Mistral AI
     - name: "openrouter-mistral-medium-3-5"
       label: "Mistral Medium 3.5"
+      iconURL: "/assets/mistral.png"
       group: "Mistral"
       groupIcon: "assets/mistral.png"
       preset:
@@ -133,6 +142,7 @@ modelSpecs:
         modelLabel: "Mistral Medium 3.5"
     - name: "openrouter-mistral-small-2603"
       label: "Mistral Small 2603"
+      iconURL: "/assets/mistral.png"
       group: "Mistral"
       preset:
         endpoint: "OpenRouter"
@@ -140,6 +150,7 @@ modelSpecs:
         modelLabel: "Mistral Small 2603"
     - name: "openrouter-codestral-2508"
       label: "Codestral 2508"
+      iconURL: "/assets/mistral.png"
       group: "Mistral"
       preset:
         endpoint: "OpenRouter"
@@ -149,14 +160,16 @@ modelSpecs:
     # DeepSeek
     - name: "openrouter-deepseek-v4-1-flash"
       label: "DeepSeek V4.1 Flash"
+      iconURL: "/assets/deepseek-square.svg"
       group: "DeepSeek"
-      groupIcon: "assets/deepseek.svg"
+      groupIcon: "/assets/deepseek-square.svg"
       preset:
         endpoint: "OpenRouter"
         model: "deepseek/deepseek-v4.1-flash-1017"
         modelLabel: "DeepSeek V4.1 Flash"
     - name: "openrouter-deepseek-v4-pro"
       label: "DeepSeek V4 Pro"
+      iconURL: "/assets/deepseek-square.svg"
       group: "DeepSeek"
       preset:
         endpoint: "OpenRouter"
