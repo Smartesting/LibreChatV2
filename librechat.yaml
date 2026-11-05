@@ -37,7 +37,7 @@ endpoints:
       modelDisplayLabel: 'Mistral' # Default is "AI" when not set.
       # Drop Default params parameters from the request.
       # NOTE: For Mistral, it is necessary to drop the following parameters or you will encounter a 422 Error:
-      dropParams: ['stop', 'user', 'frequency_penalty', 'presence_penalty']
+      dropParams: [ 'stop', 'user', 'frequency_penalty', 'presence_penalty' ]
 
     # DeepSeek
     - name: "DeepSeek"
@@ -51,3 +51,40 @@ endpoints:
       titleConvo: true
       titleModel: "deepseek-chat"
       modelDisplayLabel: "DeepSeek"
+
+    - name: 'OpenRouter'
+      apiKey: '${OPENROUTER_KEY}'
+      baseURL: "https://openrouter.ai/api/v1"
+
+      models:
+        # See all available models at https://openrouter.ai/models
+        default:
+          # OpenAI
+          - "openai/gpt-6.1-sol"
+          - "openai/gpt-6.1-terra"
+          - "openai/gpt-5.6-luna"
+
+          # Anthropic
+          - "anthropic/claude-sonnet-5.5"
+          - "anthropic/claude-haiku-5.5"
+
+          # Mistral AI
+          - "mistralai/mistral-medium-3.5"
+          - "mistralai/mistral-small-2603"
+          - "mistralai/codestral-2508"
+
+          # DeepSeek
+          - "deepseek/deepseek-v4.1-flash-1017"
+          - "deepseek/deepseek-v4-pro"
+
+          # Google
+          - "google/gemini-3.8-flash"
+          - "google/gemini-3.5-flash-lite"
+
+        fetch: false
+
+      titleConvo: true
+      titleModel: "openai/gpt-5.6-luna"
+
+      dropParams:
+        - "stop"
