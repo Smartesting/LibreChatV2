@@ -9,7 +9,7 @@ cache: true
 
 # Custom interface configuration
 interface:
-  modelSelect: true
+  modelSelect: false
   parameters: true
   presets: true
   bookmarks: true
@@ -21,37 +21,7 @@ interface:
 # Definition of custom endpoints
 endpoints:
   custom:
-    # Mistral
-    - name: 'Mistral'
-      apiKey: '${MISTRAL_API_KEY}'
-      baseURL: 'https://api.mistral.ai/v1'
-      models:
-        default:
-          - mistral-small-latest
-          - mistral-medium-latest
-          - devstral-small-latest
-        fetch: false
-      titleConvo: true # Set to true to enable title conversation
-      titleModel: 'mistral-tiny' # Defaults to "gpt-3.5-turbo" if omitted.
-      # The label displayed for the AI model in messages.
-      modelDisplayLabel: 'Mistral' # Default is "AI" when not set.
-      # Drop Default params parameters from the request.
-      # NOTE: For Mistral, it is necessary to drop the following parameters or you will encounter a 422 Error:
-      dropParams: [ 'stop', 'user', 'frequency_penalty', 'presence_penalty' ]
-
-    # DeepSeek
-    - name: "DeepSeek"
-      apiKey: "${DEEPSEEK_API_KEY}"
-      baseURL: "https://api.deepseek.com"
-      models:
-        default:
-          - deepseek-v4-flash
-          - deepseek-v4-pro
-        fetch: false
-      titleConvo: true
-      titleModel: "deepseek-chat"
-      modelDisplayLabel: "DeepSeek"
-
+    # OpenRouter
     - name: 'OpenRouter'
       apiKey: '${OPENROUTER_KEY}'
       baseURL: "https://openrouter.ai/api/v1"
@@ -91,26 +61,28 @@ endpoints:
 
 # Display names for the models served through OpenRouter
 modelSpecs:
-  prioritize: false
+  enforce: true
+  prioritize: true
   list:
     # OpenAI
     - name: "openrouter-gpt-6-1-sol"
       label: "GPT-6.1 Sol"
-      group: "OpenRouter"
+      group: "OpenAI"
+      groupIcon: "openAI"
       preset:
         endpoint: "OpenRouter"
         model: "openai/gpt-6.1-sol"
         modelLabel: "GPT-6.1 Sol"
     - name: "openrouter-gpt-6-1-terra"
       label: "GPT-6.1 Terra"
-      group: "OpenRouter"
+      group: "OpenAI"
       preset:
         endpoint: "OpenRouter"
         model: "openai/gpt-6.1-terra"
         modelLabel: "GPT-6.1 Terra"
     - name: "openrouter-gpt-5-6-luna"
       label: "GPT-5.6 Luna"
-      group: "OpenRouter"
+      group: "OpenAI"
       preset:
         endpoint: "OpenRouter"
         model: "openai/gpt-5.6-luna"
@@ -119,37 +91,56 @@ modelSpecs:
     # Anthropic
     - name: "openrouter-claude-sonnet-5-5"
       label: "Claude Sonnet 5.5"
-      group: "OpenRouter"
+      group: "Anthropic"
+      groupIcon: "anthropic"
       preset:
         endpoint: "OpenRouter"
         model: "anthropic/claude-sonnet-5.5"
         modelLabel: "Claude Sonnet 5.5"
     - name: "openrouter-claude-haiku-5-5"
       label: "Claude Haiku 5.5"
-      group: "OpenRouter"
+      group: "Anthropic"
       preset:
         endpoint: "OpenRouter"
         model: "anthropic/claude-haiku-5.5"
         modelLabel: "Claude Haiku 5.5"
 
+    # Google
+    - name: "openrouter-gemini-3-8-flash"
+      label: "Gemini 3.8 Flash"
+      group: "Google"
+      groupIcon: "google"
+      preset:
+        endpoint: "OpenRouter"
+        model: "google/gemini-3.8-flash"
+        modelLabel: "Gemini 3.8 Flash"
+    - name: "openrouter-gemini-3-5-flash-lite"
+      label: "Gemini 3.5 Flash Lite"
+      group: "Google"
+      preset:
+        endpoint: "OpenRouter"
+        model: "google/gemini-3.5-flash-lite"
+        modelLabel: "Gemini 3.5 Flash Lite"
+
     # Mistral AI
     - name: "openrouter-mistral-medium-3-5"
       label: "Mistral Medium 3.5"
-      group: "OpenRouter"
+      group: "Mistral"
+      groupIcon: "assets/mistral.png"
       preset:
         endpoint: "OpenRouter"
         model: "mistralai/mistral-medium-3-5"
         modelLabel: "Mistral Medium 3.5"
     - name: "openrouter-mistral-small-2603"
       label: "Mistral Small 2603"
-      group: "OpenRouter"
+      group: "Mistral"
       preset:
         endpoint: "OpenRouter"
         model: "mistralai/mistral-small-2603"
         modelLabel: "Mistral Small 2603"
     - name: "openrouter-codestral-2508"
       label: "Codestral 2508"
-      group: "OpenRouter"
+      group: "Mistral"
       preset:
         endpoint: "OpenRouter"
         model: "mistralai/codestral-2508"
@@ -158,31 +149,16 @@ modelSpecs:
     # DeepSeek
     - name: "openrouter-deepseek-v4-1-flash"
       label: "DeepSeek V4.1 Flash"
-      group: "OpenRouter"
+      group: "DeepSeek"
+      groupIcon: "assets/deepseek.svg"
       preset:
         endpoint: "OpenRouter"
         model: "deepseek/deepseek-v4.1-flash-1017"
         modelLabel: "DeepSeek V4.1 Flash"
     - name: "openrouter-deepseek-v4-pro"
       label: "DeepSeek V4 Pro"
-      group: "OpenRouter"
+      group: "DeepSeek"
       preset:
         endpoint: "OpenRouter"
         model: "deepseek/deepseek-v4-pro-0813"
         modelLabel: "DeepSeek V4 Pro"
-
-    # Google
-    - name: "openrouter-gemini-3-8-flash"
-      label: "Gemini 3.8 Flash"
-      group: "OpenRouter"
-      preset:
-        endpoint: "OpenRouter"
-        model: "google/gemini-3.8-flash"
-        modelLabel: "Gemini 3.8 Flash"
-    - name: "openrouter-gemini-3-5-flash-lite"
-      label: "Gemini 3.5 Flash Lite"
-      group: "OpenRouter"
-      preset:
-        endpoint: "OpenRouter"
-        model: "google/gemini-3.5-flash-lite"
-        modelLabel: "Gemini 3.5 Flash Lite"
