@@ -141,21 +141,21 @@ modelSpecs:
         model: "mistralai/mistral-medium-3-5"
         modelLabel: "Mistral Medium 3.5"
     - name: "openrouter-mistral-small-2603"
-      label: "Mistral Small 2603"
+      label: "Mistral Small 4"
       iconURL: "/assets/mistral.png"
       group: "Mistral"
       preset:
         endpoint: "OpenRouter"
         model: "mistralai/mistral-small-2603"
-        modelLabel: "Mistral Small 2603"
+        modelLabel: "Mistral Small 4"
     - name: "openrouter-codestral-2508"
-      label: "Codestral 2508"
+      label: "Codestral"
       iconURL: "/assets/mistral.png"
       group: "Mistral"
       preset:
         endpoint: "OpenRouter"
         model: "mistralai/codestral-2508"
-        modelLabel: "Codestral 2508"
+        modelLabel: "Codestral"
 
     # DeepSeek
     - name: "openrouter-deepseek-v4-1-flash"
