@@ -344,7 +344,7 @@ Remaining capacity: ${remainingTokens} tokens
 ${memory ?? 'No existing memories'}`;
     }
 
-    const defaultLLMConfig: LLMConfig = {
+    const defaultLLMConfig: OpenAIClientOptions & { provider: Providers } = {
       provider: Providers.OPENAI,
       model: 'gpt-4.1-mini',
       temperature: 0.4,
